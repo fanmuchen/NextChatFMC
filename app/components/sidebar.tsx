@@ -187,9 +187,10 @@ export function SideBarHeader(props: {
       >
         <div className={styles["sidebar-title-container"]}>
           <div className={styles["sidebar-title"]} data-tauri-drag-region>
-            {title}
+            FMC-AI
           </div>
-          <div className={styles["sidebar-sub-title"]}>{subTitle}</div>
+           <div className={styles["sidebar-sub-title"]}>⚠️ 非保密系统，注意不要泄露敏感信息。</div>
+          <div className={styles["sidebar-sub-title"]}>Please refrain from disclosing sensitive information on this non-classified system.</div>
         </div>
         <div className={clsx(styles["sidebar-logo"], "no-dark")}>{logo}</div>
       </div>
