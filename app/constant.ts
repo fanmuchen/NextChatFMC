@@ -624,6 +624,7 @@ const chatglmModels = [
 const siliconflowModels = [
   "Qwen/Qwen2.5-7B-Instruct",
   "Qwen/Qwen2.5-72B-Instruct",
+  "deepseek-r1",
   "deepseek-ai/DeepSeek-R1",
   "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
   "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
