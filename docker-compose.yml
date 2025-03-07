@@ -3,9 +3,11 @@ services:
   chatgpt-next-web:
     profiles: [ "no-proxy" ]
     container_name: chatgpt-next-web
-    image: yidadaa/chatgpt-next-web
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - 3000:3000
+      - 8004:3000
     environment:
       - OPENAI_API_KEY=$OPENAI_API_KEY
       - GOOGLE_API_KEY=$GOOGLE_API_KEY
@@ -21,7 +23,9 @@ services:
   chatgpt-next-web-proxy:
     profiles: [ "proxy" ]
     container_name: chatgpt-next-web-proxy
-    image: yidadaa/chatgpt-next-web
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 3000:3000
     environment:

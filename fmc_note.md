@@ -28,4 +28,26 @@ git merge upstream/main
 git push origin main
 ```
 
+## 在 feature 分支上处理上游更新
+```bash
+# 1. 提交当前 feature 分支的更改
+git add .
+git commit -m "描述你的更改"
+
+# 2. 切换到 main 分支并更新
+git checkout main
+git fetch upstream
+git merge upstream/main
+git push origin main
+
+# 3. 切回 feature 分支并合并 main 的更新
+git checkout feature
+git merge main
+
+# 4. 解决可能的冲突后，继续开发
+# 如果有冲突，解决后执行：
+# git add .
+# git commit -m "解决合并冲突"
+```
+
 注意：如果合并时出现冲突，需要手动解决冲突后再继续。 
