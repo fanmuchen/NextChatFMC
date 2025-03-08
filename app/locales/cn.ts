@@ -647,7 +647,7 @@ const cn = {
     Revert: "恢复上下文",
   },
   Discovery: {
-    Name: "发现",
+    Name: "用户",
   },
   Mcp: {
     Name: "MCP",

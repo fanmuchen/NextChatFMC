@@ -189,8 +189,13 @@ export function SideBarHeader(props: {
           <div className={styles["sidebar-title"]} data-tauri-drag-region>
             FMC-AI
           </div>
-           <div className={styles["sidebar-sub-title"]}>⚠️ 非保密系统，注意不要泄露敏感信息。</div>
-          <div className={styles["sidebar-sub-title"]}>Please refrain from disclosing sensitive information on this non-classified system.</div>
+          <div className={styles["sidebar-sub-title"]}>
+            ⚠️ 非保密系统，注意不要泄露敏感信息。
+          </div>
+          <div className={styles["sidebar-sub-title"]}>
+            Please refrain from disclosing sensitive information on this
+            non-classified system.
+          </div>
         </div>
         <div className={clsx(styles["sidebar-logo"], "no-dark")}>{logo}</div>
       </div>
@@ -258,15 +263,11 @@ export function SideBar(props: { className?: string }) {
       >
         <div className={styles["sidebar-header-bar"]}>
           <IconButton
-            icon={<MaskIcon />}
-            text={shouldNarrow ? undefined : Locale.Mask.Name}
+            icon={<DiscoveryIcon />}
+            text={shouldNarrow ? undefined : Locale.Discovery.Name}
             className={styles["sidebar-bar-button"]}
             onClick={() => {
-              if (config.dontShowMaskSplashScreen !== true) {
-                navigate(Path.NewChat, { state: { fromHome: true } });
-              } else {
-                navigate(Path.Masks, { state: { fromHome: true } });
-              }
+              navigate(Path.UserProfile, { state: { fromHome: true } });
             }}
             shadow
           />
@@ -282,10 +283,16 @@ export function SideBar(props: { className?: string }) {
             />
           )}
           <IconButton
-            icon={<DiscoveryIcon />}
-            text={shouldNarrow ? undefined : Locale.Discovery.Name}
+            icon={<MaskIcon />}
+            text={shouldNarrow ? undefined : Locale.Mask.Name}
             className={styles["sidebar-bar-button"]}
-            onClick={() => setshowDiscoverySelector(true)}
+            onClick={() => {
+              if (config.dontShowMaskSplashScreen !== true) {
+                navigate(Path.NewChat, { state: { fromHome: true } });
+              } else {
+                navigate(Path.Masks, { state: { fromHome: true } });
+              }
+            }}
             shadow
           />
         </div>
