@@ -30,7 +30,7 @@ import { type ClientApi, getClientApi } from "../client/api";
 import { useAccessStore } from "../store";
 import clsx from "clsx";
 import { initializeMcpSystem, isMcpEnabled } from "../mcp/actions";
-import { UserProfile } from "../user-profile";
+import { User } from "../user";
 
 export function Loading(props: { noLogo?: boolean }) {
   return (
@@ -203,7 +203,7 @@ function Screen() {
             <Route path={Path.Chat} element={<Chat />} />
             <Route path={Path.Settings} element={<Settings />} />
             <Route path={Path.McpMarket} element={<McpMarketPage />} />
-            <Route path={Path.UserProfile} element={<UserProfile />} />
+            <Route path={Path.User} element={<User />} />
           </Routes>
         </WindowContent>
       </>

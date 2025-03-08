@@ -267,7 +267,7 @@ export function SideBar(props: { className?: string }) {
             text={shouldNarrow ? undefined : Locale.Discovery.Name}
             className={styles["sidebar-bar-button"]}
             onClick={() => {
-              navigate(Path.UserProfile, { state: { fromHome: true } });
+              navigate(Path.User, { state: { fromHome: true } });
             }}
             shadow
           />
