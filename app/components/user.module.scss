@@ -1,0 +1,271 @@
+@import "../styles/animation.scss";
+
+.user-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: slide-in ease 0.3s;
+  background-color: var(--white);
+  color: var(--black);
+
+  .window-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-in-light);
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .window-header-title {
+      max-width: calc(100% - 100px);
+      overflow: hidden;
+
+      .window-header-main-title {
+        font-size: 16px;
+        font-weight: bold;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .window-header-sub-title {
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--black-50);
+      }
+    }
+
+    .window-actions {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .settings {
+    padding: 20px;
+    overflow: auto;
+    flex-grow: 1;
+  }
+
+  .avatar-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+    position: relative;
+
+    &::after {
+      content: "点击更换头像";
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--black-50);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    &:hover::after {
+      opacity: 1;
+    }
+
+    svg {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      padding: 10px;
+      border: 1px solid var(--border-in-light);
+      box-shadow: var(--card-shadow);
+      transition: all ease 0.3s;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: var(--card-shadow-medium);
+      }
+    }
+  }
+
+  .account-section,
+  .security-section,
+  .preferences-section,
+  .logout-section {
+    width: 100%;
+  }
+
+  .profile-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-in-light);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .profile-item-title {
+      font-size: 14px;
+      color: var(--black-75);
+    }
+
+    .profile-item-content {
+      font-size: 14px;
+      color: var(--black);
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .profile-value-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .profile-value {
+      font-weight: 500;
+    }
+
+    .edit-button {
+      opacity: 0.6;
+      transition: opacity 0.3s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .edit-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .edit-input {
+      padding: 8px;
+      border: 1px solid var(--border-in-light);
+      border-radius: 4px;
+      font-size: 14px;
+      outline: none;
+
+      &:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+      }
+    }
+  }
+
+  .theme-select,
+  .language-select {
+    padding: 8px;
+    border: 1px solid var(--border-in-light);
+    border-radius: 4px;
+    background-color: var(--white);
+    color: var(--black);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: all ease 0.3s;
+
+    &:hover,
+    &:focus {
+      border-color: var(--primary);
+    }
+
+    option {
+      background-color: var(--white);
+      color: var(--black);
+    }
+  }
+
+  .settings-button {
+    padding: 8px 16px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: var(--primary-hover);
+    }
+  }
+
+  .cancel-button {
+    padding: 8px 16px;
+    background-color: var(--gray);
+    color: var(--black);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: var(--gray-hover);
+    }
+  }
+
+  .password-modal {
+    padding: 20px;
+    max-width: 500px;
+    width: 100%;
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .password-form-item {
+      margin-bottom: 15px;
+
+      .password-form-label {
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: var(--black-75);
+      }
+    }
+
+    .password-error {
+      color: var(--danger);
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .password-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .profile-item {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 12px 0;
+
+      .profile-item-title {
+        margin-bottom: 8px;
+      }
+
+      .profile-item-content {
+        width: 100%;
+      }
+    }
+
+    .edit-form {
+      width: 100%;
+
+      .edit-input {
+        flex-grow: 1;
+      }
+    }
+  }
+}
