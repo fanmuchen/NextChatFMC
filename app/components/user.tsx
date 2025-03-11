@@ -11,7 +11,14 @@ import Locale from "../locales";
 import { useAppConfig } from "../store";
 import { Avatar, AvatarPicker } from "./emoji";
 import { ErrorBoundary } from "./error";
-import { Modal, showToast, List, ListItem, PasswordInput } from "./ui-lib";
+import {
+  Modal,
+  showToast,
+  List,
+  ListItem,
+  PasswordInput,
+  Popover,
+} from "./ui-lib";
 
 export function User() {
   const navigate = useNavigate();
@@ -155,131 +162,131 @@ export function User() {
         <div className={styles["settings"]}>
           <List>
             <ListItem title="头像">
-              <div
-                className={styles["avatar-container"]}
-                onClick={() => setShowAvatarPicker(true)}
+              <Popover
+                onClose={() => setShowAvatarPicker(false)}
+                content={
+                  <AvatarPicker
+                    onEmojiClick={(avatar: string) => {
+                      updateAvatar(avatar);
+                    }}
+                  />
+                }
+                open={showAvatarPicker}
               >
-                <Avatar avatar={config.avatar} />
-              </div>
-            </ListItem>
-
-            <ListItem title="账户信息">
-              <div className={styles["account-section"]}>
-                <div className={styles["profile-item"]}>
-                  <div className={styles["profile-item-title"]}>用户名</div>
-                  <div className={styles["profile-item-content"]}>
-                    {editingUsername ? (
-                      <form
-                        onSubmit={handleUsernameChange}
-                        className={styles["edit-form"]}
-                      >
-                        <input
-                          type="text"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          className={styles["edit-input"]}
-                          autoFocus
-                        />
-                        <IconButton
-                          icon={<ConfirmIcon />}
-                          type="primary"
-                          text={Locale.UI.Confirm}
-                          onClick={handleUsernameButtonClick}
-                        />
-                      </form>
-                    ) : (
-                      <div className={styles["profile-value-container"]}>
-                        <span className={styles["profile-value"]}>
-                          {username}
-                        </span>
-                        <IconButton
-                          icon={<EditIcon />}
-                          onClick={() => setEditingUsername(true)}
-                          className={styles["edit-button"]}
-                          title="编辑"
-                        />
-                      </div>
-                    )}
-                  </div>
+                <div
+                  aria-label="头像"
+                  tabIndex={0}
+                  className={styles.avatar}
+                  onClick={() => {
+                    setShowAvatarPicker(!showAvatarPicker);
+                  }}
+                >
+                  <Avatar avatar={config.avatar} />
                 </div>
-
-                <div className={styles["profile-item"]}>
-                  <div className={styles["profile-item-title"]}>邮箱</div>
-                  <div className={styles["profile-item-content"]}>
-                    {editingEmail ? (
-                      <form
-                        onSubmit={handleEmailChange}
-                        className={styles["edit-form"]}
-                      >
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className={styles["edit-input"]}
-                          autoFocus
-                        />
-                        <IconButton
-                          icon={<ConfirmIcon />}
-                          type="primary"
-                          text={Locale.UI.Confirm}
-                          onClick={handleEmailButtonClick}
-                        />
-                      </form>
-                    ) : (
-                      <div className={styles["profile-value-container"]}>
-                        <span className={styles["profile-value"]}>{email}</span>
-                        <IconButton
-                          icon={<EditIcon />}
-                          onClick={() => setEditingEmail(true)}
-                          className={styles["edit-button"]}
-                          title="编辑"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              </Popover>
             </ListItem>
+          </List>
 
-            <ListItem title="账户安全">
-              <div className={styles["security-section"]}>
-                <div className={styles["profile-item"]}>
-                  <div className={styles["profile-item-title"]}>密码</div>
-                  <div className={styles["profile-item-content"]}>
-                    <IconButton
-                      icon={<EditIcon />}
-                      text="修改密码"
-                      onClick={() => setShowPasswordModal(true)}
-                      bordered
-                    />
-                  </div>
+          <List>
+            <ListItem title="账户信息" />
+            <ListItem title="用户名">
+              {editingUsername ? (
+                <form
+                  onSubmit={handleUsernameChange}
+                  className={styles["edit-form"]}
+                >
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className={styles["edit-input"]}
+                    autoFocus
+                  />
+                  <IconButton
+                    icon={<ConfirmIcon />}
+                    type="primary"
+                    text={Locale.UI.Confirm}
+                    onClick={handleUsernameButtonClick}
+                  />
+                </form>
+              ) : (
+                <div className={styles["profile-value-container"]}>
+                  <span className={styles["profile-value"]}>{username}</span>
+                  <IconButton
+                    icon={<EditIcon />}
+                    onClick={() => setEditingUsername(true)}
+                    className={styles["edit-button"]}
+                    title="编辑"
+                  />
                 </div>
-              </div>
+              )}
             </ListItem>
-
-            <ListItem title="偏好设置">
-              <div className={styles["preferences-section"]}>
-                <div className={styles["profile-item"]}>
-                  <div className={styles["profile-item-title"]}>主题</div>
-                  <div className={styles["profile-item-content"]}>
-                    <select
-                      value={config.theme}
-                      onChange={(e) => {
-                        config.update(
-                          (config) => (config.theme = e.target.value as any),
-                        );
-                      }}
-                      className={styles["theme-select"]}
-                    >
-                      <option value="auto">跟随系统</option>
-                      <option value="light">浅色</option>
-                      <option value="dark">深色</option>
-                    </select>
-                  </div>
+            <ListItem title="邮箱">
+              {editingEmail ? (
+                <form
+                  onSubmit={handleEmailChange}
+                  className={styles["edit-form"]}
+                >
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={styles["edit-input"]}
+                    autoFocus
+                  />
+                  <IconButton
+                    icon={<ConfirmIcon />}
+                    type="primary"
+                    text={Locale.UI.Confirm}
+                    onClick={handleEmailButtonClick}
+                  />
+                </form>
+              ) : (
+                <div className={styles["profile-value-container"]}>
+                  <span className={styles["profile-value"]}>{email}</span>
+                  <IconButton
+                    icon={<EditIcon />}
+                    onClick={() => setEditingEmail(true)}
+                    className={styles["edit-button"]}
+                    title="编辑"
+                  />
                 </div>
-              </div>
+              )}
             </ListItem>
+          </List>
 
+          <List>
+            <ListItem title="账户安全" />
+            <ListItem title="密码">
+              <IconButton
+                icon={<EditIcon />}
+                text="修改密码"
+                onClick={() => setShowPasswordModal(true)}
+                bordered
+              />
+            </ListItem>
+          </List>
+
+          <List>
+            <ListItem title="偏好设置" />
+            <ListItem title="主题">
+              <select
+                value={config.theme}
+                onChange={(e) => {
+                  config.update(
+                    (config) => (config.theme = e.target.value as any),
+                  );
+                }}
+                className={styles["theme-select"]}
+              >
+                <option value="auto">跟随系统</option>
+                <option value="light">浅色</option>
+                <option value="dark">深色</option>
+              </select>
+            </ListItem>
+          </List>
+
+          <List>
             <ListItem>
               <div className={styles["logout-section"]}>
                 <IconButton
@@ -292,12 +299,6 @@ export function User() {
             </ListItem>
           </List>
         </div>
-
-        {showAvatarPicker && (
-          <Modal title="选择头像" onClose={() => setShowAvatarPicker(false)}>
-            <AvatarPicker onEmojiClick={(avatar) => updateAvatar(avatar)} />
-          </Modal>
-        )}
 
         {showPasswordModal && (
           <Modal title="修改密码" onClose={() => setShowPasswordModal(false)}>
