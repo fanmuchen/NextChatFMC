@@ -21,7 +21,7 @@ echo -e "${GREEN}Starting deployment process...${NC}"
 
 # Create a temporary directory for the deployment package
 TEMP_DIR=$(mktemp -d) || handle_error "Failed to create temporary directory"
-PACKAGE_NAME="nextchat-deploy.tar.gz"
+PACKAGE_NAME="chat-fmc-ai-deploy.tar.gz"
 
 echo -e "${GREEN}Creating deployment package...${NC}"
 

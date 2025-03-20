@@ -1,6 +1,6 @@
 {
-  "name": "NextChat",
-  "short_name": "NextChat",
+  "name": "chat-fmc-ai",
+  "short_name": "chat-fmc-ai",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

@@ -86,8 +86,8 @@ export enum FileName {
 }
 
 export enum StoreKey {
-  Chat = "chat-next-web-store",
-  Plugin = "chat-next-web-plugin",
+  Chat = "chat-fmc-ai-store",
+  Plugin = "chat-fmc-ai-plugin",
   Access = "access-control",
   Config = "app-config",
   Mask = "mask-store",
@@ -500,6 +500,8 @@ const openaiModels = [
   "o1-mini",
   "o1-preview",
   "o3-mini",
+  "gpt-4-all",
+  "gpt-4o-all",
 ];
 
 const googleModels = [
@@ -828,5 +830,5 @@ export const internalAllowedWebDavEndpoints = [
 
 export const DEFAULT_GA_ID = "G-89WN60ZK2E";
 
-export const SAAS_CHAT_URL = "https://nextchat.club";
-export const SAAS_CHAT_UTM_URL = "https://nextchat.club?utm=github";
+export const SAAS_CHAT_URL = "https://chat-fmc-ai.com";
+export const SAAS_CHAT_UTM_URL = "https://chat-fmc-ai.com?utm=github";
