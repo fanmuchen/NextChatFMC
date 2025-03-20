@@ -1,6 +1,7 @@
 # Git 操作笔记
 
 ## 初始设置（仅需执行一次）
+
 ```bash
 # 克隆仓库
 git clone https://github.com/fanmuchen/NextChatFMC
@@ -14,6 +15,7 @@ git remote -v
 ```
 
 ## 与上游仓库同步（当需要更新时执行）
+
 ```bash
 # 1. 获取上游更新
 git fetch upstream
@@ -29,6 +31,7 @@ git push origin main
 ```
 
 ## 在 feature 分支上处理上游更新
+
 ```bash
 # 1. 提交当前 feature 分支的更改
 git add .
@@ -50,4 +53,4 @@ git merge main
 # git commit -m "解决合并冲突"
 ```
 
-注意：如果合并时出现冲突，需要手动解决冲突后再继续。 
+注意：如果合并时出现冲突，需要手动解决冲突后再继续。
