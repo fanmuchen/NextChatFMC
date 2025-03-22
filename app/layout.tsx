@@ -9,10 +9,10 @@ import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 import { getServerSideConfig } from "./config/server";
 
 export const metadata: Metadata = {
-  title: "chat-fmc-ai",
-  description: "Your personal ChatGPT Chat Bot.",
+  title: "Chat-FMC-AI",
+  description: "FMC's ChatGPT Chat Bot.",
   appleWebApp: {
-    title: "chat-fmc-ai",
+    title: "Chat-FMC-AI",
     statusBarStyle: "default",
   },
 };

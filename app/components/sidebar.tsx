@@ -189,11 +189,10 @@ export function SideBarHeader(props: {
             FMC-AI
           </div>
           <div className={styles["sidebar-sub-title"]}>
-            ⚠️ 非保密系统，注意不要泄露敏感信息。
+            ⚠️ 注意不要泄露敏感信息。
           </div>
           <div className={styles["sidebar-sub-title"]}>
-            Please refrain from disclosing sensitive information on this
-            non-classified system.
+            Please refrain from disclosing sensitive information.
           </div>
         </div>
         <div className={clsx(styles["sidebar-logo"], "no-dark")}>{logo}</div>
@@ -255,8 +254,8 @@ export function SideBar(props: { className?: string }) {
       {...props}
     >
       <SideBarHeader
-        title="chat-fmc-ai"
-        subTitle="Build your own AI assistant."
+        title="Chat-FMC-AI"
+        subTitle="My own AI assistant."
         shouldNarrow={shouldNarrow}
       >
         <div className={styles["sidebar-header-bar"]}>
