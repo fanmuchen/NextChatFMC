@@ -42,6 +42,9 @@ export function AuthPage() {
   useEffect(() => {
     if (getClientConfig()?.isApp) {
       navigate(Path.Settings);
+    } else {
+      // Auto-redirect to chat page - everyone has access now
+      navigate(Path.Chat);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

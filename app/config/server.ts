@@ -249,21 +249,20 @@ export const getServerSideConfig = () => {
     gtmId: process.env.GTM_ID,
     gaId: process.env.GA_ID || DEFAULT_GA_ID,
 
-    needCode: ACCESS_CODES.size > 0,
-    code: process.env.CODE,
-    codes: ACCESS_CODES,
-
-    proxyUrl: process.env.PROXY_URL,
     isVercel: !!process.env.VERCEL,
+    proxyUrl: process.env.PROXY_URL,
 
-    hideUserApiKey: !!process.env.HIDE_USER_API_KEY,
-    disableGPT4,
+    enableMCP: !!process.env.ENABLE_MCP, // enable mcp functionality
+    codes: ACCESS_CODES,
+    needCode: false, // Changed from process.env.CODE to false
+    hideUserApiKey: false, // Changed from !!process.env.HIDE_USER_API_KEY to false
     hideBalanceQuery: !process.env.ENABLE_BALANCE_QUERY,
-    disableFastLink: !!process.env.DISABLE_FAST_LINK,
+    disableGPT4,
+    allowedWebDavEndpoints,
     customModels,
     defaultModel,
     visionModels,
-    allowedWebDavEndpoints,
-    enableMcp: process.env.ENABLE_MCP === "true",
+    defaultInputTemplate: process.env.DEFAULT_INPUT_TEMPLATE,
+    disableFastLink: !!process.env.DISABLE_FAST_LINK,
   };
 };

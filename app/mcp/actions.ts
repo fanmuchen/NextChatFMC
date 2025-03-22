@@ -377,7 +377,7 @@ async function updateMcpConfig(config: McpConfigData): Promise<void> {
 export async function isMcpEnabled() {
   try {
     const serverConfig = getServerSideConfig();
-    return serverConfig.enableMcp;
+    return serverConfig.enableMCP;
   } catch (error) {
     logger.error(`Failed to check MCP status: ${error}`);
     return false;
