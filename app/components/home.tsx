@@ -236,12 +236,22 @@ export function useLoadData() {
   }, []);
 }
 
-export function Home() {
+export function Home({
+  isAuthenticated,
+  userClaims,
+}: {
+  isAuthenticated?: boolean;
+  userClaims?: any;
+}) {
   useSwitchTheme();
   useLoadData();
   useHtmlLang();
 
+  // Store auth state in access store to use throughout the app
   useEffect(() => {
+    if (isAuthenticated && userClaims) {
+      console.log("[Auth] User authenticated:", userClaims);
+    }
     console.log("[Config] got config from build time", getClientConfig());
     useAccessStore.getState().fetch();
 
@@ -258,7 +268,7 @@ export function Home() {
       }
     };
     initMcp();
-  }, []);
+  }, [isAuthenticated, userClaims]);
 
   if (!useHasHydrated()) {
     return <Loading />;

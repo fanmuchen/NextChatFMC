@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./user.module.scss";
+import authStyles from "./auth.module.scss";
 import { IconButton } from "./button";
 import CloseIcon from "../icons/close.svg";
-import EditIcon from "../icons/edit.svg";
-import ResetIcon from "../icons/reload.svg";
-import ConfirmIcon from "../icons/confirm.svg";
 import { useNavigate } from "react-router-dom";
 import { Path } from "../constant";
 import Locale from "../locales";
@@ -19,6 +17,7 @@ import {
   PasswordInput,
   Popover,
 } from "./ui-lib";
+import { Loading } from "./home";
 
 export function User() {
   const navigate = useNavigate();
@@ -29,6 +28,41 @@ export function User() {
   const [email, setEmail] = useState("user@example.com");
   const [editingUsername, setEditingUsername] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userClaims, setUserClaims] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch("/api/auth/status");
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(data.isAuthenticated);
+          setUserClaims(data.claims);
+
+          if (data.isAuthenticated && data.claims) {
+            if (data.claims.name) {
+              setUsername(data.claims.name);
+            } else if (data.claims.sub) {
+              setUsername(data.claims.sub);
+            }
+
+            if (data.claims.email) {
+              setEmail(data.claims.email);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch auth status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   // Update avatar function
   const updateAvatar = (avatar: string) => {
@@ -61,10 +95,14 @@ export function User() {
     handleEmailChange({ preventDefault: () => {} } as React.FormEvent);
   };
 
+  // Handle login
+  const handleLogin = () => {
+    window.location.href = "/api/auth/signin";
+  };
+
   // Handle logout
   const handleLogout = () => {
-    showToast("已退出登录");
-    navigate(Path.Home);
+    window.location.href = "/api/auth/signout";
   };
 
   // Password change modal component
@@ -139,6 +177,10 @@ export function User() {
     );
   }
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <ErrorBoundary>
       <div className={styles["user-page"]}>
@@ -160,148 +202,74 @@ export function User() {
         </div>
 
         <div className={styles["settings"]}>
-          <List>
-            <ListItem title="头像">
-              <Popover
-                onClose={() => setShowAvatarPicker(false)}
-                content={
-                  <AvatarPicker
-                    onEmojiClick={(avatar: string) => {
-                      updateAvatar(avatar);
-                    }}
-                  />
-                }
-                open={showAvatarPicker}
-              >
-                <div
-                  aria-label="头像"
-                  tabIndex={0}
-                  className={styles.avatar}
-                  onClick={() => {
-                    setShowAvatarPicker(!showAvatarPicker);
-                  }}
-                >
-                  <Avatar avatar={config.avatar} />
-                </div>
-              </Popover>
-            </ListItem>
-          </List>
+          {isAuthenticated ? (
+            <>
+              <List>
+                <ListItem title="头像">
+                  <Popover
+                    onClose={() => setShowAvatarPicker(false)}
+                    content={
+                      <AvatarPicker
+                        onEmojiClick={(avatar: string) => {
+                          updateAvatar(avatar);
+                        }}
+                      />
+                    }
+                    open={showAvatarPicker}
+                  >
+                    <div
+                      aria-label="头像"
+                      tabIndex={0}
+                      className={styles.avatar}
+                      onClick={() => {
+                        setShowAvatarPicker(!showAvatarPicker);
+                      }}
+                    >
+                      <Avatar avatar={config.avatar} />
+                    </div>
+                  </Popover>
+                </ListItem>
+              </List>
 
-          <List>
-            <ListItem title="账户信息" />
-            <ListItem title="用户名">
-              {editingUsername ? (
-                <form
-                  onSubmit={handleUsernameChange}
-                  className={styles["edit-form"]}
-                >
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className={styles["edit-input"]}
-                    autoFocus
-                  />
+              <List>
+                <ListItem title="账户信息" />
+                <ListItem title="用户名">
+                  <div className={styles["profile-value-container"]}>
+                    <span className={styles["profile-value"]}>{username}</span>
+                  </div>
+                </ListItem>
+                {email && (
+                  <ListItem title="邮箱">
+                    <div className={styles["profile-value-container"]}>
+                      <span className={styles["profile-value"]}>{email}</span>
+                    </div>
+                  </ListItem>
+                )}
+              </List>
+
+              <List>
+                <ListItem>
                   <IconButton
-                    icon={<ConfirmIcon />}
+                    text="退出登录"
+                    onClick={handleLogout}
                     type="primary"
-                    text={Locale.UI.Confirm}
-                    onClick={handleUsernameButtonClick}
                   />
-                </form>
-              ) : (
-                <div className={styles["profile-value-container"]}>
-                  <span className={styles["profile-value"]}>{username}</span>
-                  <IconButton
-                    icon={<EditIcon />}
-                    onClick={() => setEditingUsername(true)}
-                    className={styles["edit-button"]}
-                    title="编辑"
-                  />
-                </div>
-              )}
-            </ListItem>
-            <ListItem title="邮箱">
-              {editingEmail ? (
-                <form
-                  onSubmit={handleEmailChange}
-                  className={styles["edit-form"]}
-                >
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={styles["edit-input"]}
-                    autoFocus
-                  />
-                  <IconButton
-                    icon={<ConfirmIcon />}
-                    type="primary"
-                    text={Locale.UI.Confirm}
-                    onClick={handleEmailButtonClick}
-                  />
-                </form>
-              ) : (
-                <div className={styles["profile-value-container"]}>
-                  <span className={styles["profile-value"]}>{email}</span>
-                  <IconButton
-                    icon={<EditIcon />}
-                    onClick={() => setEditingEmail(true)}
-                    className={styles["edit-button"]}
-                    title="编辑"
-                  />
-                </div>
-              )}
-            </ListItem>
-          </List>
-
-          <List>
-            <ListItem title="账户安全" />
-            <ListItem title="密码">
-              <IconButton
-                icon={<EditIcon />}
-                text="修改密码"
-                onClick={() => setShowPasswordModal(true)}
-                bordered
-              />
-            </ListItem>
-          </List>
-
-          <List>
-            <ListItem title="偏好设置" />
-            <ListItem title="主题">
-              <select
-                value={config.theme}
-                onChange={(e) => {
-                  config.update(
-                    (config) => (config.theme = e.target.value as any),
-                  );
-                }}
-                className={styles["theme-select"]}
-              >
-                <option value="auto">跟随系统</option>
-                <option value="light">浅色</option>
-                <option value="dark">深色</option>
-              </select>
-            </ListItem>
-          </List>
-
-          <List>
-            <ListItem>
-              <div className={styles["logout-section"]}>
-                <IconButton
-                  icon={<ResetIcon />}
-                  text="退出登录"
-                  onClick={handleLogout}
-                  type="danger"
-                />
-              </div>
-            </ListItem>
-          </List>
+                </ListItem>
+              </List>
+            </>
+          ) : (
+            <div className={authStyles["auth-actions"]}>
+              <IconButton text="登录" onClick={handleLogin} type="primary" />
+            </div>
+          )}
         </div>
 
         {showPasswordModal && (
-          <Modal title="修改密码" onClose={() => setShowPasswordModal(false)}>
+          <Modal
+            title="修改密码"
+            onClose={() => setShowPasswordModal(false)}
+            actions={[]}
+          >
             <PasswordChangeModal onClose={() => setShowPasswordModal(false)} />
           </Modal>
         )}
