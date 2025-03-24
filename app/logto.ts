@@ -1,11 +1,12 @@
 export const logtoConfig = {
-  endpoint: "https://auth.muchen.fan/",
-  appId: "r8iodto59fsk28o4rqauj",
-  appSecret: "QN0D5FesDWiPyEE6UqNJSzcEELnzTKNm",
+  endpoint: process.env.LOGTO_ENDPOINT || "https://auth.example.com/",
+  appId: process.env.LOGTO_APP_ID || "example-app-id",
+  appSecret: process.env.LOGTO_APP_SECRET || "example-app-secret",
   baseUrl:
     process.env.NODE_ENV === "production"
-      ? "https://chat.fmc.ai"
-      : "http://localhost:3000",
-  cookieSecret: "QptWXblM3Mw91cufGTovjNVzRoewZFSQ", // Auto-generated 32 digit secret
+      ? process.env.LOGTO_BASE_URL_PROD || "https://example.com"
+      : process.env.LOGTO_BASE_URL_DEV || "http://localhost:3000",
+  cookieSecret:
+    process.env.LOGTO_COOKIE_SECRET || "example-cookie-secret-32-digits-long", // Auto-generated 32 digit secret
   cookieSecure: process.env.NODE_ENV === "production",
 };

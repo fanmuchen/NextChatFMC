@@ -25,9 +25,8 @@ export function User() {
   const config = useAppConfig();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [username, setUsername] = useState("用户");
-  const [email, setEmail] = useState("user@example.com");
-  const [editingUsername, setEditingUsername] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [editingEmail, setEditingEmail] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userClaims, setUserClaims] = useState<any>(null);
@@ -44,10 +43,15 @@ export function User() {
           setUserClaims(data.claims);
 
           if (data.isAuthenticated && data.claims) {
-            if (data.claims.name) {
+            // First try to use username
+            if (data.claims.username) {
+              setUsername(data.claims.username);
+            } else if (data.claims.name) {
               setUsername(data.claims.name);
             } else if (data.claims.sub) {
               setUsername(data.claims.sub);
+            } else {
+              setUsername("用户");
             }
 
             if (data.claims.email) {
@@ -70,18 +74,6 @@ export function User() {
     config.update((config) => (config.avatar = avatar));
     setShowAvatarPicker(false);
     showToast("头像已更新");
-  };
-
-  // Handle username change
-  const handleUsernameChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    setEditingUsername(false);
-    showToast("用户名已更新");
-  };
-
-  // Handle username button click
-  const handleUsernameButtonClick = () => {
-    handleUsernameChange({ preventDefault: () => {} } as React.FormEvent);
   };
 
   // Handle email change
@@ -113,9 +105,7 @@ export function User() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-
+    const handleSubmit = () => {
       if (newPassword !== confirmPassword) {
         setError("两次输入的密码不一致");
         return;
@@ -127,8 +117,25 @@ export function User() {
     };
 
     return (
-      <div className={styles["password-modal"]}>
-        <form onSubmit={handleSubmit}>
+      <div className="modal-mask">
+        <Modal
+          title="修改密码"
+          onClose={props.onClose}
+          actions={[
+            <IconButton
+              key="confirm"
+              onClick={handleSubmit}
+              type="primary"
+              text={Locale.UI.Confirm}
+            />,
+            <IconButton
+              key="cancel"
+              onClick={props.onClose}
+              text={Locale.UI.Cancel}
+              bordered
+            />,
+          ]}
+        >
           <List>
             <ListItem title="当前密码">
               <PasswordInput
@@ -157,16 +164,7 @@ export function User() {
           </List>
 
           {error && <div className={styles["password-error"]}>{error}</div>}
-
-          <div className={styles["actions"]}>
-            <IconButton
-              text={Locale.UI.Cancel}
-              onClick={props.onClose}
-              bordered
-            />
-            <IconButton type="primary" text={Locale.UI.Confirm} />
-          </div>
-        </form>
+        </Modal>
       </div>
     );
   }
@@ -225,35 +223,9 @@ export function User() {
 
               <List>
                 <ListItem title="用户名">
-                  {editingUsername ? (
-                    <div className={styles["edit-form"]}>
-                      <input
-                        className={styles["edit-input"]}
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        autoFocus
-                      />
-                      <IconButton
-                        icon={<ConfirmIcon />}
-                        onClick={handleUsernameButtonClick}
-                        bordered
-                      />
-                      <IconButton
-                        icon={<CloseIcon />}
-                        onClick={() => setEditingUsername(false)}
-                        bordered
-                      />
-                    </div>
-                  ) : (
-                    <div className={styles["edit-container"]}>
-                      <span>{username}</span>
-                      <IconButton
-                        icon={<EditIcon />}
-                        bordered
-                        onClick={() => setEditingUsername(true)}
-                      />
-                    </div>
-                  )}
+                  <div className={styles["user-info"]}>
+                    <span>{username}</span>
+                  </div>
                 </ListItem>
 
                 {email && (
@@ -308,15 +280,9 @@ export function User() {
               </List>
 
               {showPasswordModal && (
-                <Modal
-                  title="修改密码"
+                <PasswordChangeModal
                   onClose={() => setShowPasswordModal(false)}
-                  actions={[]}
-                >
-                  <PasswordChangeModal
-                    onClose={() => setShowPasswordModal(false)}
-                  />
-                </Modal>
+                />
               )}
             </>
           ) : (
