@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styles from "./user.module.scss";
-import authStyles from "./auth.module.scss";
 import { IconButton } from "./button";
 import CloseIcon from "../icons/close.svg";
+import EditIcon from "../icons/edit.svg";
+import ConfirmIcon from "../icons/confirm.svg";
 import { useNavigate } from "react-router-dom";
 import { Path } from "../constant";
 import Locale from "../locales";
@@ -127,50 +128,43 @@ export function User() {
 
     return (
       <div className={styles["password-modal"]}>
-        <div className={styles["modal-title"]}>修改密码</div>
         <form onSubmit={handleSubmit}>
-          <div className={styles["password-form-item"]}>
-            <div className={styles["password-form-label"]}>当前密码</div>
-            <PasswordInput
-              value={oldPassword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setOldPassword(e.target.value)
-              }
-              placeholder="请输入当前密码"
-            />
-          </div>
-          <div className={styles["password-form-item"]}>
-            <div className={styles["password-form-label"]}>新密码</div>
-            <PasswordInput
-              value={newPassword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setNewPassword(e.target.value)
-              }
-              placeholder="请输入新密码"
-            />
-          </div>
-          <div className={styles["password-form-item"]}>
-            <div className={styles["password-form-label"]}>确认密码</div>
-            <PasswordInput
-              value={confirmPassword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setConfirmPassword(e.target.value)
-              }
-              placeholder="请再次输入新密码"
-            />
-          </div>
+          <List>
+            <ListItem title="当前密码">
+              <PasswordInput
+                value={oldPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setOldPassword(e.currentTarget.value)
+                }
+              />
+            </ListItem>
+            <ListItem title="新密码">
+              <PasswordInput
+                value={newPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewPassword(e.currentTarget.value)
+                }
+              />
+            </ListItem>
+            <ListItem title="确认密码">
+              <PasswordInput
+                value={confirmPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfirmPassword(e.currentTarget.value)
+                }
+              />
+            </ListItem>
+          </List>
+
           {error && <div className={styles["password-error"]}>{error}</div>}
-          <div className={styles["password-form-actions"]}>
-            <button
-              type="button"
-              className={styles["cancel-button"]}
+
+          <div className={styles["actions"]}>
+            <IconButton
+              text={Locale.UI.Cancel}
               onClick={props.onClose}
-            >
-              {Locale.UI.Cancel}
-            </button>
-            <button type="submit" className={styles["settings-button"]}>
-              {Locale.UI.Confirm}
-            </button>
+              bordered
+            />
+            <IconButton type="primary" text={Locale.UI.Confirm} />
           </div>
         </form>
       </div>
@@ -184,20 +178,22 @@ export function User() {
   return (
     <ErrorBoundary>
       <div className={styles["user-page"]}>
-        <div className={styles["window-header"]}>
-          <div className={styles["window-header-title"]}>
-            <div className={styles["window-header-main-title"]}>个人中心</div>
-            <div className={styles["window-header-sub-title"]}>
-              管理您的个人信息
-            </div>
+        <div className="window-header" data-tauri-drag-region>
+          <div className="window-header-title">
+            <div className="window-header-main-title">个人中心</div>
+            <div className="window-header-sub-title">管理您的个人信息</div>
           </div>
-          <div className={styles["window-actions"]}>
-            <IconButton
-              icon={<CloseIcon />}
-              onClick={() => navigate(Path.Home)}
-              bordered
-              title={Locale.UI.Close}
-            />
+          <div className="window-actions">
+            <div className="window-action-button"></div>
+            <div className="window-action-button"></div>
+            <div className="window-action-button">
+              <IconButton
+                icon={<CloseIcon />}
+                onClick={() => navigate(Path.Home)}
+                bordered
+                title={Locale.UI.Close}
+              />
+            </div>
           </div>
         </div>
 
@@ -218,12 +214,8 @@ export function User() {
                     open={showAvatarPicker}
                   >
                     <div
-                      aria-label="头像"
-                      tabIndex={0}
                       className={styles.avatar}
-                      onClick={() => {
-                        setShowAvatarPicker(!showAvatarPicker);
-                      }}
+                      onClick={() => setShowAvatarPicker(!showAvatarPicker)}
                     >
                       <Avatar avatar={config.avatar} />
                     </div>
@@ -232,47 +224,113 @@ export function User() {
               </List>
 
               <List>
-                <ListItem title="账户信息" />
                 <ListItem title="用户名">
-                  <div className={styles["profile-value-container"]}>
-                    <span className={styles["profile-value"]}>{username}</span>
-                  </div>
+                  {editingUsername ? (
+                    <div className={styles["edit-form"]}>
+                      <input
+                        className={styles["edit-input"]}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        autoFocus
+                      />
+                      <IconButton
+                        icon={<ConfirmIcon />}
+                        onClick={handleUsernameButtonClick}
+                        bordered
+                      />
+                      <IconButton
+                        icon={<CloseIcon />}
+                        onClick={() => setEditingUsername(false)}
+                        bordered
+                      />
+                    </div>
+                  ) : (
+                    <div className={styles["edit-container"]}>
+                      <span>{username}</span>
+                      <IconButton
+                        icon={<EditIcon />}
+                        bordered
+                        onClick={() => setEditingUsername(true)}
+                      />
+                    </div>
+                  )}
                 </ListItem>
+
                 {email && (
                   <ListItem title="邮箱">
-                    <div className={styles["profile-value-container"]}>
-                      <span className={styles["profile-value"]}>{email}</span>
-                    </div>
+                    {editingEmail ? (
+                      <div className={styles["edit-form"]}>
+                        <input
+                          className={styles["edit-input"]}
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          autoFocus
+                        />
+                        <IconButton
+                          icon={<ConfirmIcon />}
+                          onClick={handleEmailButtonClick}
+                          bordered
+                        />
+                        <IconButton
+                          icon={<CloseIcon />}
+                          onClick={() => setEditingEmail(false)}
+                          bordered
+                        />
+                      </div>
+                    ) : (
+                      <div className={styles["edit-container"]}>
+                        <span>{email}</span>
+                        <IconButton
+                          icon={<EditIcon />}
+                          bordered
+                          onClick={() => setEditingEmail(true)}
+                        />
+                      </div>
+                    )}
                   </ListItem>
                 )}
               </List>
 
               <List>
-                <ListItem>
+                <ListItem title="密码" subTitle="定期修改密码可以保障账户安全">
                   <IconButton
-                    text="退出登录"
-                    onClick={handleLogout}
-                    type="primary"
+                    text="修改密码"
+                    onClick={() => setShowPasswordModal(true)}
+                    bordered
                   />
                 </ListItem>
               </List>
+
+              <List>
+                <ListItem title="账户">
+                  <IconButton text="退出登录" onClick={handleLogout} bordered />
+                </ListItem>
+              </List>
+
+              {showPasswordModal && (
+                <Modal
+                  title="修改密码"
+                  onClose={() => setShowPasswordModal(false)}
+                  actions={[]}
+                >
+                  <PasswordChangeModal
+                    onClose={() => setShowPasswordModal(false)}
+                  />
+                </Modal>
+              )}
             </>
           ) : (
-            <div className={authStyles["auth-actions"]}>
-              <IconButton text="登录" onClick={handleLogin} type="primary" />
-            </div>
+            <List>
+              <ListItem title="登录" subTitle="登录以管理您的账户">
+                <IconButton
+                  text="立即登录"
+                  onClick={handleLogin}
+                  type="primary"
+                />
+              </ListItem>
+            </List>
           )}
         </div>
-
-        {showPasswordModal && (
-          <Modal
-            title="修改密码"
-            onClose={() => setShowPasswordModal(false)}
-            actions={[]}
-          >
-            <PasswordChangeModal onClose={() => setShowPasswordModal(false)} />
-          </Modal>
-        )}
       </div>
     </ErrorBoundary>
   );

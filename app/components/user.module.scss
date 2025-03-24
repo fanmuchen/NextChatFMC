@@ -15,13 +15,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: var(--white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     .window-header-title {
       max-width: calc(100% - 100px);
       overflow: hidden;
 
       .window-header-main-title {
-        font-size: 16px;
+        font-size: 18px;
         font-weight: bold;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -29,11 +31,12 @@
       }
 
       .window-header-sub-title {
-        font-size: 12px;
+        font-size: 13px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         color: var(--black-50);
+        margin-top: 2px;
       }
     }
 
@@ -44,15 +47,19 @@
   }
 
   .settings {
-    padding: 20px;
+    padding: 24px;
     overflow: auto;
     flex-grow: 1;
+    background-color: var(--gray);
   }
 
   .avatar {
     cursor: pointer;
-    position: relative;
-    z-index: 1;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
   }
 
   .avatar-container {
@@ -94,9 +101,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 8px 0;
 
     .profile-value {
       font-weight: 500;
+      color: var(--primary);
     }
 
     .edit-button {
@@ -109,17 +118,29 @@
     }
   }
 
+  .edit-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    span {
+      font-weight: 500;
+      color: var(--primary);
+    }
+  }
+
   .edit-form {
     display: flex;
     align-items: center;
     gap: 8px;
 
     .edit-input {
-      padding: 8px;
+      padding: 10px;
       border: 1px solid var(--border-in-light);
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 14px;
       outline: none;
+      transition: all 0.3s ease;
 
       &:focus {
         border-color: var(--primary);
@@ -130,9 +151,9 @@
 
   .theme-select,
   .language-select {
-    padding: 8px;
+    padding: 10px;
     border: 1px solid var(--border-in-light);
-    border-radius: 4px;
+    border-radius: 8px;
     background-color: var(--white);
     color: var(--black);
     font-size: 14px;
@@ -148,75 +169,164 @@
     option {
       background-color: var(--white);
       color: var(--black);
+      padding: 8px;
     }
   }
 
   .settings-button {
-    padding: 8px 16px;
+    padding: 10px 18px;
     background-color: var(--primary);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.3s;
+    font-weight: 500;
+    transition:
+      background-color 0.3s,
+      transform 0.2s ease;
+    box-shadow: 0 2px 5px rgba(var(--primary-rgb), 0.3);
 
     &:hover {
       background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(var(--primary-rgb), 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 3px rgba(var(--primary-rgb), 0.3);
     }
   }
 
   .cancel-button {
-    padding: 8px 16px;
+    padding: 10px 18px;
     background-color: var(--gray);
     color: var(--black);
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.3s;
+    font-weight: 500;
+    transition:
+      background-color 0.3s,
+      transform 0.2s ease;
 
     &:hover {
       background-color: var(--gray-hover);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 
   .password-modal {
-    padding: 20px;
-    max-width: 500px;
+    padding: 16px 0;
     width: 100%;
-
-    .modal-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .password-form-item {
-      margin-bottom: 15px;
-
-      .password-form-label {
-        font-size: 14px;
-        margin-bottom: 5px;
-        color: var(--black-75);
-      }
-    }
 
     .password-error {
       color: var(--danger);
       font-size: 14px;
-      margin-bottom: 15px;
+      margin: 15px 0;
+      padding: 8px 12px;
+      background-color: rgba(var(--danger-rgb), 0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+
+      &::before {
+        content: "⚠️";
+        margin-right: 8px;
+      }
     }
 
-    .password-form-actions {
+    .actions {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 12px;
       margin-top: 20px;
     }
   }
 
+  // 新增卡片样式
+  .user-card {
+    background-color: var(--white);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .user-card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-in-light);
+
+      .user-card-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--primary);
+      }
+    }
+  }
+
+  // 新增用户信息展示卡片
+  .user-info-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 24px;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+
+    .user-avatar-container {
+      margin-bottom: 16px;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 3px;
+        background-color: var(--primary);
+        border-radius: 3px;
+      }
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .user-email {
+      font-size: 14px;
+      color: var(--black-50);
+      margin-bottom: 16px;
+    }
+  }
+
   @media screen and (max-width: 600px) {
+    .settings {
+      padding: 16px;
+    }
+
     .profile-item {
       flex-direction: column;
       align-items: flex-start;
@@ -237,6 +347,10 @@
       .edit-input {
         flex-grow: 1;
       }
+    }
+
+    .user-info-card {
+      padding: 16px;
     }
   }
 }
