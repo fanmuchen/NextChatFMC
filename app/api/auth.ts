@@ -33,11 +33,15 @@ export function auth(req: NextRequest, modelProvider: ModelProvider) {
   const hashedCode = md5.hash(accessCode ?? "").trim();
 
   const serverConfig = getServerSideConfig();
-  console.log("[Auth] allowed hashed codes: ", [...serverConfig.codes]);
-  console.log("[Auth] got access code:", accessCode);
-  console.log("[Auth] hashed access code:", hashedCode);
-  console.log("[User IP] ", getIP(req));
-  console.log("[Time] ", new Date().toLocaleString());
+
+  // Only log auth details in development environment or for debug purposes
+  if (process.env.NODE_ENV === "development") {
+    console.log("[Auth] allowed hashed codes: ", [...serverConfig.codes]);
+    console.log("[Auth] got access code:", accessCode);
+    console.log("[Auth] hashed access code:", hashedCode);
+    console.log("[User IP] ", getIP(req));
+    console.log("[Time] ", new Date().toLocaleString());
+  }
 
   // if user does not provide an api key, inject system api key
   if (!apiKey) {
@@ -93,13 +97,16 @@ export function auth(req: NextRequest, modelProvider: ModelProvider) {
     }
 
     if (systemApiKey) {
-      console.log("[Auth] use system api key");
+      // Only log this in development environment
+      if (process.env.NODE_ENV === "development") {
+        console.log("[Auth] using system API key");
+      }
       req.headers.set("Authorization", `Bearer ${systemApiKey}`);
     } else {
-      console.log("[Auth] admin did not provide an api key");
+      console.error("[Auth] Error: Admin did not provide an API key");
     }
-  } else {
-    console.log("[Auth] use user api key");
+  } else if (process.env.NODE_ENV === "development") {
+    console.log("[Auth] using user API key");
   }
 
   return {

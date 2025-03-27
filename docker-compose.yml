@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   chatgpt-next-web:
     profiles: ["no-proxy"]
@@ -9,6 +8,11 @@ services:
     ports:
       - 8004:3000
     environment:
+      # Elastic logging configuration
+      - ENABLE_ELASTIC_LOG=$ENABLE_ELASTIC_LOG
+      - ELASTIC_LOG_HOST=$ELASTIC_LOG_HOST
+      - ELASTIC_LOG_INDEX=$ELASTIC_LOG_INDEX
+      # Other environment variables
       - OPENAI_API_KEY=$OPENAI_API_KEY
       - DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY
       - GOOGLE_API_KEY=$GOOGLE_API_KEY
@@ -53,6 +57,11 @@ services:
     ports:
       - 3000:3000
     environment:
+      # Elastic logging configuration
+      - ENABLE_ELASTIC_LOG=$ENABLE_ELASTIC_LOG
+      - ELASTIC_LOG_HOST=$ELASTIC_LOG_HOST
+      - ELASTIC_LOG_INDEX=$ELASTIC_LOG_INDEX
+      # Other environment variables
       - OPENAI_API_KEY=$OPENAI_API_KEY
       - DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY
       - GOOGLE_API_KEY=$GOOGLE_API_KEY

@@ -5,6 +5,7 @@ import { prettyObject } from "@/app/utils/format";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./auth";
 import { requestOpenai } from "./common";
+import { withElasticLogging } from "./logging-middleware";
 
 const ALLOWED_PATH = new Set(Object.values(OpenaiPath));
 
@@ -26,10 +27,10 @@ function getModels(remoteModelRes: OpenAIListModelResponse) {
   return remoteModelRes;
 }
 
-export async function handle(
+async function handleOpenAI(
   req: NextRequest,
   { params }: { params: { path: string[] } },
-) {
+): Promise<NextResponse> {
   console.log("[OpenAI Route] params ", params);
 
   if (req.method === "OPTIONS") {
@@ -63,16 +64,22 @@ export async function handle(
 
     // list models
     if (subpath === OpenaiPath.ListModelPath && response.status === 200) {
-      const resJson = (await response.json()) as OpenAIListModelResponse;
+      // Create clone of the response to read the body without consuming it
+      const clonedResponse = response.clone();
+      const resJson = (await clonedResponse.json()) as OpenAIListModelResponse;
       const availableModels = getModels(resJson);
       return NextResponse.json(availableModels, {
         status: response.status,
       });
     }
 
+    // Return the NextResponse directly
     return response;
   } catch (e) {
     console.error("[OpenAI] ", e);
     return NextResponse.json(prettyObject(e));
   }
 }
+
+// Export the handler wrapped with Elastic logging
+export const handle = withElasticLogging(handleOpenAI);

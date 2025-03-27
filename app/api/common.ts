@@ -6,7 +6,7 @@ import { getModelProvider, isModelNotavailableInServer } from "../utils/model";
 
 const serverConfig = getServerSideConfig();
 
-export async function requestOpenai(req: NextRequest) {
+export async function requestOpenai(req: NextRequest): Promise<NextResponse> {
   const controller = new AbortController();
 
   const isAzure = req.nextUrl.pathname.includes("azure/deployments");
@@ -175,7 +175,8 @@ export async function requestOpenai(req: NextRequest) {
     // The browser will try to decode the response with brotli and fail
     newHeaders.delete("content-encoding");
 
-    return new Response(res.body, {
+    // Use NextResponse instead of Response
+    return new NextResponse(res.body, {
       status: res.status,
       statusText: res.statusText,
       headers: newHeaders,
