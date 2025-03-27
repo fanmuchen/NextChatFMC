@@ -1,7 +1,7 @@
 services:
-  chatgpt-next-web:
+  chat-fmc-ai:
     profiles: ["no-proxy"]
-    container_name: chatgpt-next-web
+    container_name: chat-fmc-ai
     build:
       context: .
       dockerfile: Dockerfile
