@@ -7,9 +7,7 @@ import React, {
   useMemo,
   useRef,
   useState,
-  memo,
 } from "react";
-import debounce from "lodash/debounce";
 
 import SendWhiteIcon from "../icons/send-white.svg";
 import BrainIcon from "../icons/brain.svg";
@@ -135,8 +133,6 @@ const ttsPlayer = createTTSPlayer();
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
 });
-
-const SEARCH_TEXT_LIMIT = 30;
 
 const MCPAction = () => {
   const navigate = useNavigate();
@@ -495,29 +491,19 @@ function useScrollToBottom(
   };
 }
 
-interface ChatActionsProps {
+export function ChatActions(props: {
   uploadImage: () => void;
   setAttachImages: (images: string[]) => void;
   setUploading: (uploading: boolean) => void;
   showPromptModal: () => void;
   scrollToBottom: () => void;
+  showPromptHints: () => void;
   hitBottom: boolean;
   uploading: boolean;
   setShowShortcutKeyModal: React.Dispatch<React.SetStateAction<boolean>>;
   setUserInput: (input: string) => void;
   setShowChatSidePanel: React.Dispatch<React.SetStateAction<boolean>>;
-  promptHints: RenderPrompt[];
-  setPromptHints: (hints: RenderPrompt[]) => void;
-  inputRef: React.RefObject<HTMLTextAreaElement>;
-  onSearch: (text: string) => void;
-  couldStop: boolean;
-  stopAll: () => void;
-  showUploadImage: boolean;
-  nextTheme: () => void;
-  showPromptHints: () => void;
-}
-
-export function ChatActions(props: ChatActionsProps) {
+}) {
   const config = useAppConfig();
   const navigate = useNavigate();
   const chatStore = useChatStore();
@@ -613,9 +599,9 @@ export function ChatActions(props: ChatActionsProps) {
   return (
     <div className={styles["chat-input-actions"]}>
       <>
-        {props.couldStop && (
+        {couldStop && (
           <ChatAction
-            onClick={props.stopAll}
+            onClick={stopAll}
             text={Locale.Chat.InputActions.Stop}
             icon={<StopIcon />}
           />
@@ -635,7 +621,7 @@ export function ChatActions(props: ChatActionsProps) {
           />
         )}
 
-        {props.showUploadImage && (
+        {showUploadImage && (
           <ChatAction
             onClick={props.uploadImage}
             text={Locale.Chat.InputActions.UploadImage}
@@ -643,7 +629,7 @@ export function ChatActions(props: ChatActionsProps) {
           />
         )}
         <ChatAction
-          onClick={props.nextTheme}
+          onClick={nextTheme}
           text={Locale.Chat.InputActions.Theme[theme]}
           icon={
             <>
@@ -861,102 +847,6 @@ export function ChatActions(props: ChatActionsProps) {
   );
 }
 
-// Memoize individual action handlers
-const useChatActionHandlers = (props: ChatActionsProps) => {
-  const { setPromptHints, inputRef, setUserInput, onSearch } = props;
-
-  const handlePromptHints = useCallback(() => {
-    if (props.promptHints.length > 0) {
-      setPromptHints([]);
-      return;
-    }
-    inputRef.current?.focus();
-    setUserInput("/");
-    onSearch("");
-  }, [
-    props.promptHints.length,
-    setPromptHints,
-    inputRef,
-    setUserInput,
-    onSearch,
-  ]);
-
-  const handleUploadImage = useCallback(() => {
-    props.uploadImage();
-  }, [props.uploadImage]);
-
-  const handleShowPromptModal = useCallback(() => {
-    props.showPromptModal();
-  }, [props.showPromptModal]);
-
-  return {
-    handlePromptHints,
-    handleUploadImage,
-    handleShowPromptModal,
-  };
-};
-
-// Memoize the ChatActions component
-const MemoizedChatActions = memo(function ChatActions(props: ChatActionsProps) {
-  const handlers = useChatActionHandlers(props);
-  const config = useAppConfig();
-  const theme = config.theme;
-
-  return (
-    <div className={styles["chat-input-actions"]}>
-      {props.couldStop && (
-        <ChatAction
-          onClick={props.stopAll}
-          text={Locale.Chat.InputActions.Stop}
-          icon={<StopIcon />}
-        />
-      )}
-      {!props.hitBottom && (
-        <ChatAction
-          onClick={props.scrollToBottom}
-          text={Locale.Chat.InputActions.ToBottom}
-          icon={<BottomIcon />}
-        />
-      )}
-      {props.hitBottom && (
-        <ChatAction
-          onClick={handlers.handleShowPromptModal}
-          text={Locale.Chat.InputActions.Settings}
-          icon={<SettingsIcon />}
-        />
-      )}
-      {props.showUploadImage && (
-        <ChatAction
-          onClick={handlers.handleUploadImage}
-          text={Locale.Chat.InputActions.UploadImage}
-          icon={props.uploading ? <LoadingButtonIcon /> : <ImageIcon />}
-        />
-      )}
-      <ChatAction
-        onClick={props.nextTheme}
-        text={Locale.Chat.InputActions.Theme[theme]}
-        icon={
-          <>
-            {theme === Theme.Auto ? (
-              <AutoIcon />
-            ) : theme === Theme.Light ? (
-              <LightIcon />
-            ) : theme === Theme.Dark ? (
-              <DarkIcon />
-            ) : null}
-          </>
-        }
-      />
-      <ChatAction
-        onClick={handlers.handlePromptHints}
-        text={Locale.Chat.InputActions.Prompt}
-        icon={<PromptIcon />}
-      />
-      {/* ... rest of the actions ... */}
-    </div>
-  );
-});
-
 export function EditMessageModal(props: { onClose: () => void }) {
   const chatStore = useChatStore();
   const session = chatStore.currentSession();
@@ -1107,7 +997,6 @@ function _Chat() {
 
   const [showExport, setShowExport] = useState(false);
 
-  const [inputRows, setInputRows] = useState(2);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [userInput, setUserInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -1157,7 +1046,28 @@ function _Chat() {
     { leading: true, trailing: true },
   );
 
-  // Initialize chat commands first
+  // auto grow input
+  const [inputRows, setInputRows] = useState(2);
+  const measure = useDebouncedCallback(
+    () => {
+      const rows = inputRef.current ? autoGrowTextArea(inputRef.current) : 1;
+      const inputRows = Math.min(
+        20,
+        Math.max(2 + Number(!isMobileScreen), rows),
+      );
+      setInputRows(inputRows);
+    },
+    100,
+    {
+      leading: true,
+      trailing: true,
+    },
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(measure, [userInput]);
+
+  // chat commands shortcuts
   const chatCommands = useChatCommand({
     new: () => chatStore.newSession(),
     newm: () => navigate(Path.NewChat),
@@ -1172,56 +1082,25 @@ function _Chat() {
     del: () => chatStore.deleteSession(chatStore.currentSessionIndex),
   });
 
-  // Optimize input handling with memoization and debouncing
-  const onInput = useMemo(() => {
-    const debouncedSearch = debounce((text: string) => {
-      const n = text.trim().length;
-      if (n === 0) {
-        setPromptHints([]);
-      } else if (text.match(ChatCommandPrefix)) {
-        setPromptHints(chatCommands.search(text));
-      } else if (!config.disablePromptHint && n < SEARCH_TEXT_LIMIT) {
-        if (text.startsWith("/")) {
-          onSearch(text.slice(1));
-        }
+  // only search prompts when user input is short
+  const SEARCH_TEXT_LIMIT = 30;
+  const onInput = (text: string) => {
+    setUserInput(text);
+    const n = text.trim().length;
+
+    // clear search results
+    if (n === 0) {
+      setPromptHints([]);
+    } else if (text.match(ChatCommandPrefix)) {
+      setPromptHints(chatCommands.search(text));
+    } else if (!config.disablePromptHint && n < SEARCH_TEXT_LIMIT) {
+      // check if need to trigger auto completion
+      if (text.startsWith("/")) {
+        let searchText = text.slice(1);
+        onSearch(searchText);
       }
-    }, 200);
-
-    return (text: string) => {
-      setUserInput(text);
-      debouncedSearch(text);
-    };
-  }, [chatCommands, config.disablePromptHint, onSearch]);
-
-  // Optimize textarea auto-grow
-  const measure = useMemo(() => {
-    return debounce(() => {
-      if (!inputRef.current) return;
-
-      // Cache the current scroll position
-      const scrollPos = inputRef.current.scrollTop;
-
-      // Measure new height
-      const rows = autoGrowTextArea(inputRef.current);
-      const newRows = Math.min(20, Math.max(2 + Number(!isMobileScreen), rows));
-
-      // Only update if rows changed
-      if (newRows !== inputRows) {
-        setInputRows(newRows);
-        // Restore scroll position after state update
-        requestAnimationFrame(() => {
-          if (inputRef.current) {
-            inputRef.current.scrollTop = scrollPos;
-          }
-        });
-      }
-    }, 150);
-  }, [isMobileScreen, inputRows]);
-
-  // Optimize effect dependency
-  useEffect(() => {
-    measure();
-  }, [userInput, measure]);
+    }
+  };
 
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "" && isEmpty(attachImages)) return;
@@ -2166,7 +2045,7 @@ function _Chat() {
                 onPromptSelect={onPromptSelect}
               />
 
-              <MemoizedChatActions
+              <ChatActions
                 uploadImage={uploadImage}
                 setAttachImages={setAttachImages}
                 setUploading={setUploading}
@@ -2175,10 +2054,12 @@ function _Chat() {
                 hitBottom={hitBottom}
                 uploading={uploading}
                 showPromptHints={() => {
+                  // Click again to close
                   if (promptHints.length > 0) {
                     setPromptHints([]);
                     return;
                   }
+
                   inputRef.current?.focus();
                   setUserInput("/");
                   onSearch("");
@@ -2186,18 +2067,6 @@ function _Chat() {
                 setShowShortcutKeyModal={setShowShortcutKeyModal}
                 setUserInput={setUserInput}
                 setShowChatSidePanel={setShowChatSidePanel}
-                promptHints={promptHints}
-                setPromptHints={setPromptHints}
-                inputRef={inputRef}
-                onSearch={onSearch}
-                couldStop={true}
-                stopAll={() => {
-                  /* Add stop functionality */
-                }}
-                showUploadImage={true}
-                nextTheme={() => {
-                  /* Add theme switch functionality */
-                }}
               />
               <label
                 className={clsx(styles["chat-input-panel-inner"], {
