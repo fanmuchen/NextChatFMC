@@ -322,6 +322,17 @@
     }
   }
 
+  .password-reset-info {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-color);
+
+    p {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+  }
+
   @media screen and (max-width: 600px) {
     .settings {
       padding: 16px;

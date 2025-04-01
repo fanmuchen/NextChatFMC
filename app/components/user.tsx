@@ -10,14 +10,7 @@ import Locale from "../locales";
 import { useAppConfig } from "../store";
 import { Avatar, AvatarPicker } from "./emoji";
 import { ErrorBoundary } from "./error";
-import {
-  Modal,
-  showToast,
-  List,
-  ListItem,
-  PasswordInput,
-  Popover,
-} from "./ui-lib";
+import { Modal, showToast, List, ListItem, Popover } from "./ui-lib";
 import { Loading } from "./home";
 
 export function User() {
@@ -98,35 +91,24 @@ export function User() {
     window.location.href = "/api/auth/signout";
   };
 
-  // Password change modal component
-  function PasswordChangeModal(props: { onClose: () => void }) {
-    const [oldPassword, setOldPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
+  // Handle password reset
+  const handlePasswordReset = () => {
+    window.location.href = "/api/auth/reset-password";
+  };
 
-    const handleSubmit = () => {
-      if (newPassword !== confirmPassword) {
-        setError("两次输入的密码不一致");
-        return;
-      }
-
-      // Here you would implement the actual password change logic
-      showToast("密码已修改");
-      props.onClose();
-    };
-
+  // Password reset modal component
+  function PasswordResetModal(props: { onClose: () => void }) {
     return (
       <div className="modal-mask">
         <Modal
-          title="修改密码"
+          title="重置密码"
           onClose={props.onClose}
           actions={[
             <IconButton
               key="confirm"
-              onClick={handleSubmit}
+              onClick={handlePasswordReset}
               type="primary"
-              text={Locale.UI.Confirm}
+              text="发送重置邮件"
             />,
             <IconButton
               key="cancel"
@@ -136,34 +118,10 @@ export function User() {
             />,
           ]}
         >
-          <List>
-            <ListItem title="当前密码">
-              <PasswordInput
-                value={oldPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setOldPassword(e.currentTarget.value)
-                }
-              />
-            </ListItem>
-            <ListItem title="新密码">
-              <PasswordInput
-                value={newPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setNewPassword(e.currentTarget.value)
-                }
-              />
-            </ListItem>
-            <ListItem title="确认密码">
-              <PasswordInput
-                value={confirmPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setConfirmPassword(e.currentTarget.value)
-                }
-              />
-            </ListItem>
-          </List>
-
-          {error && <div className={styles["password-error"]}>{error}</div>}
+          <div className={styles["password-reset-info"]}>
+            <p>我们将向您的邮箱发送密码重置链接。</p>
+            <p>请检查您的邮箱并按照邮件中的说明重置密码。</p>
+          </div>
         </Modal>
       </div>
     );
@@ -266,7 +224,7 @@ export function User() {
               <List>
                 <ListItem title="密码" subTitle="定期修改密码可以保障账户安全">
                   <IconButton
-                    text="修改密码"
+                    text="重置密码"
                     onClick={() => setShowPasswordModal(true)}
                     bordered
                   />
@@ -280,7 +238,7 @@ export function User() {
               </List>
 
               {showPasswordModal && (
-                <PasswordChangeModal
+                <PasswordResetModal
                   onClose={() => setShowPasswordModal(false)}
                 />
               )}
