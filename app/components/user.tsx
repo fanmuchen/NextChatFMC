@@ -332,12 +332,6 @@ export function User() {
               </List>
 
               <List>
-                <ListItem title="用户名">
-                  <div className={styles["user-info"]}>
-                    <span>{username}</span>
-                  </div>
-                </ListItem>
-
                 {email && (
                   <ListItem title="邮箱">
                     <div className={styles["user-info"]}>
@@ -350,14 +344,6 @@ export function User() {
                   <ListItem title="手机号码">
                     <div className={styles["user-info"]}>
                       <span>{userDetails.phone}</span>
-                    </div>
-                  </ListItem>
-                )}
-
-                {userDetails?.userId && (
-                  <ListItem title="用户ID">
-                    <div className={styles["user-info"]}>
-                      <span>{userDetails.userId}</span>
                     </div>
                   </ListItem>
                 )}

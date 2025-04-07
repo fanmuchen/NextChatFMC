@@ -47,7 +47,6 @@ import StyleIcon from "../icons/palette.svg";
 import PluginIcon from "../icons/plugin.svg";
 import ShortcutkeyIcon from "../icons/shortcutkey.svg";
 import McpToolIcon from "../icons/tool.svg";
-import HeadphoneIcon from "../icons/headphone.svg";
 import {
   BOT_HELLO,
   ChatMessage,
@@ -122,7 +121,6 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from "../utils/ms_edge_tts";
 
 import { isEmpty } from "lodash-es";
 import { getModelProvider } from "../utils/model";
-import { RealtimeChat } from "@/app/components/realtime-chat";
 import clsx from "clsx";
 import { getAvailableClientsCount, isMcpEnabled } from "../mcp/actions";
 
@@ -835,6 +833,7 @@ export function ChatActions(props: {
         {!isMobileScreen && <MCPAction />}
       </>
       <div className={styles["chat-input-actions-end"]}>
+        {/* Commented out realtime chat button
         {config.realtimeConfig.enable && (
           <ChatAction
             onClick={() => props.setShowChatSidePanel(true)}
@@ -842,6 +841,7 @@ export function ChatActions(props: {
             icon={<HeadphoneIcon />}
           />
         )}
+        */}
       </div>
     </div>
   );
@@ -2132,6 +2132,7 @@ function _Chat() {
               [styles["chat-side-panel-show"]]: showChatSidePanel,
             })}
           >
+            {/* Commented out realtime chat panel
             {showChatSidePanel && (
               <RealtimeChat
                 onClose={() => {
@@ -2142,6 +2143,7 @@ function _Chat() {
                 }}
               />
             )}
+            */}
           </div>
         </div>
       </div>
