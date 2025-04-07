@@ -10,7 +10,14 @@ import Locale from "../locales";
 import { useAppConfig } from "../store";
 import { Avatar, AvatarPicker } from "./emoji";
 import { ErrorBoundary } from "./error";
-import { Modal, showToast, List, ListItem, Popover } from "./ui-lib";
+import {
+  Modal,
+  showToast,
+  List,
+  ListItem,
+  Popover,
+  PasswordInput,
+} from "./ui-lib";
 import { Loading } from "./home";
 
 export function User() {
@@ -202,37 +209,45 @@ export function User() {
             />,
           ]}
         >
-          <div className={styles["password-reset-form"]}>
-            {error && <div className={styles["error-message"]}>{error}</div>}
-            <div className={styles["form-group"]}>
-              <label>当前密码</label>
-              <input
-                type="password"
+          <List>
+            {error && (
+              <ListItem>
+                <div className={styles["error-message"]}>{error}</div>
+              </ListItem>
+            )}
+            <ListItem title="当前密码">
+              <PasswordInput
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setCurrentPassword(e.target.value)
+                }
                 placeholder="请输入当前密码"
               />
-            </div>
-            <div className={styles["form-group"]}>
-              <label>新密码</label>
-              <input
-                type="password"
+            </ListItem>
+            <ListItem title="新密码">
+              <PasswordInput
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewPassword(e.target.value)
+                }
                 placeholder="请输入新密码"
               />
-            </div>
-            <div className={styles["form-group"]}>
-              <label>确认新密码</label>
-              <input
-                type="password"
+            </ListItem>
+            <ListItem title="确认新密码">
+              <PasswordInput
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfirmPassword(e.target.value)
+                }
                 placeholder="请再次输入新密码"
               />
-            </div>
-            {isLoading && <div className={styles["loading"]}>处理中...</div>}
-          </div>
+            </ListItem>
+            {isLoading && (
+              <ListItem>
+                <div className={styles["loading"]}>处理中...</div>
+              </ListItem>
+            )}
+          </List>
         </Modal>
       </div>
     );
