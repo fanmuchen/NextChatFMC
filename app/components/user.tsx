@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import styles from "./user.module.scss";
 import { IconButton } from "./button";
 import CloseIcon from "../icons/close.svg";
-import EditIcon from "../icons/edit.svg";
-import ConfirmIcon from "../icons/confirm.svg";
 import { useNavigate } from "react-router-dom";
 import { Path } from "../constant";
 import Locale from "../locales";
@@ -28,7 +26,6 @@ export function User() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [editingEmail, setEditingEmail] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userClaims, setUserClaims] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,18 +94,6 @@ export function User() {
     showToast("头像已更新");
   };
 
-  // Handle email change
-  const handleEmailChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    setEditingEmail(false);
-    showToast("邮箱已更新");
-  };
-
-  // Handle email button click
-  const handleEmailButtonClick = () => {
-    handleEmailChange({ preventDefault: () => {} } as React.FormEvent);
-  };
-
   // Handle login
   const handleLogin = () => {
     window.location.href = "/api/auth/signin";
@@ -127,8 +112,15 @@ export function User() {
   // Format date function
   const formatDate = (timestamp: number) => {
     if (!timestamp) return "未知";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleString();
+    const date = new Date(timestamp);
+    return date.toLocaleString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
   };
 
   // Password reset modal component
@@ -348,35 +340,9 @@ export function User() {
 
                 {email && (
                   <ListItem title="邮箱">
-                    {editingEmail ? (
-                      <div className={styles["edit-form"]}>
-                        <input
-                          className={styles["edit-input"]}
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          autoFocus
-                        />
-                        <IconButton
-                          icon={<ConfirmIcon />}
-                          onClick={handleEmailButtonClick}
-                          bordered
-                        />
-                        <IconButton
-                          icon={<CloseIcon />}
-                          onClick={() => setEditingEmail(false)}
-                          bordered
-                        />
-                      </div>
-                    ) : (
-                      <div className={styles["edit-container"]}>
-                        <span>{email}</span>
-                        <IconButton
-                          icon={<EditIcon />}
-                          bordered
-                          onClick={() => setEditingEmail(true)}
-                        />
-                      </div>
-                    )}
+                    <div className={styles["user-info"]}>
+                      <span>{email}</span>
+                    </div>
                   </ListItem>
                 )}
 

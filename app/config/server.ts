@@ -244,7 +244,7 @@ export const getServerSideConfig = () => {
     enableMCP: !!process.env.ENABLE_MCP, // enable mcp functionality
     codes: ACCESS_CODES,
     needCode: false, // Changed from process.env.CODE to false
-    hideUserApiKey: false, // Changed from !!process.env.HIDE_USER_API_KEY to false
+    hideUserApiKey: !!process.env.HIDE_USER_API_KEY, // Use the environment variable
     hideBalanceQuery: !process.env.ENABLE_BALANCE_QUERY,
     disableGPT4,
     allowedWebDavEndpoints,
