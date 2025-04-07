@@ -19,6 +19,7 @@ import {
   PasswordInput,
 } from "./ui-lib";
 import { Loading } from "./home";
+import { encrypt } from "../utils/encryption";
 
 export function User() {
   const navigate = useNavigate();
@@ -137,6 +138,26 @@ export function User() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [encryptionKey, setEncryptionKey] = useState("");
+
+    // Fetch encryption key when modal opens
+    useEffect(() => {
+      const fetchEncryptionKey = async () => {
+        try {
+          const response = await fetch("/api/auth/encryption-key");
+          if (!response.ok) {
+            throw new Error("Failed to fetch encryption key");
+          }
+          const data = await response.json();
+          setEncryptionKey(data.encryptionKey);
+        } catch (error) {
+          console.error("Error fetching encryption key:", error);
+          setError("无法获取加密密钥，请稍后重试");
+        }
+      };
+
+      fetchEncryptionKey();
+    }, []);
 
     const handleSubmit = async () => {
       // 验证表单
@@ -155,18 +176,31 @@ export function User() {
         return;
       }
 
+      if (!encryptionKey) {
+        setError("加密密钥未就绪，请稍后重试");
+        return;
+      }
+
       setIsLoading(true);
       setError("");
 
       try {
+        // 加密密码
+        const encryptedCurrentPassword = encrypt(
+          currentPassword,
+          encryptionKey,
+        );
+        const encryptedNewPassword = encrypt(newPassword, encryptionKey);
+
         const response = await fetch("/api/auth/change-password", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            currentPassword,
-            newPassword,
+            currentPassword: encryptedCurrentPassword,
+            newPassword: encryptedNewPassword,
+            encryptionKey,
           }),
         });
 

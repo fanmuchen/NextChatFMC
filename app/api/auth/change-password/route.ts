@@ -5,6 +5,7 @@ import {
   verifyUserPassword,
   updateUserPassword,
 } from "../../../utils/logto-management-api";
+import { decrypt } from "../../../utils/encryption";
 
 // Force this route to be dynamically rendered at runtime
 export const dynamic = "force-dynamic";
@@ -52,25 +53,44 @@ export async function POST(request: NextRequest) {
 
     // 解析请求体
     const body = await request.json();
-    const { currentPassword, newPassword } = body;
+    const { currentPassword, newPassword, encryptionKey } = body;
 
-    if (!currentPassword || !newPassword) {
+    if (!currentPassword || !newPassword || !encryptionKey) {
       console.warn("密码修改请求缺少必要参数", {
         hasCurrentPassword: !!currentPassword,
         hasNewPassword: !!newPassword,
+        hasEncryptionKey: !!encryptionKey,
         userId: authResult.userId,
       });
       return new Response(
-        JSON.stringify({ error: "当前密码和新密码不能为空" }),
+        JSON.stringify({ error: "当前密码、新密码和加密密钥不能为空" }),
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
+    }
+
+    // 解密密码
+    let decryptedCurrentPassword: string;
+    let decryptedNewPassword: string;
+
+    try {
+      decryptedCurrentPassword = decrypt(currentPassword, encryptionKey);
+      decryptedNewPassword = decrypt(newPassword, encryptionKey);
+    } catch (error) {
+      console.error("密码解密失败", {
+        userId: authResult.userId,
+        error: error instanceof Error ? error.message : "未知错误",
+      });
+      return new Response(JSON.stringify({ error: "密码解密失败，请重试" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // 1. 首先验证当前密码
     console.log("正在验证当前密码");
     const isPasswordValid = await verifyUserPassword(
       authResult.userId,
-      currentPassword,
+      decryptedCurrentPassword,
     );
 
     if (!isPasswordValid) {
@@ -87,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     // 2. 更新密码
     console.log("正在更新密码");
-    await updateUserPassword(authResult.userId, newPassword);
+    await updateUserPassword(authResult.userId, decryptedNewPassword);
 
     console.log("密码更新成功", {
       userId: authResult.userId,
