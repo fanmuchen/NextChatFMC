@@ -93,22 +93,79 @@ export function User() {
 
   // Handle password reset
   const handlePasswordReset = () => {
-    window.location.href = "/api/auth/reset-password";
+    setShowPasswordModal(true);
   };
 
   // Password reset modal component
   function PasswordResetModal(props: { onClose: () => void }) {
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async () => {
+      // 验证表单
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        setError("所有字段都是必填的");
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setError("新密码和确认密码不匹配");
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        setError("新密码长度必须至少为8个字符");
+        return;
+      }
+
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const response = await fetch("/api/auth/change-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError(data.error || "密码修改失败");
+          return;
+        }
+
+        // 密码修改成功
+        showToast("密码已成功更新");
+        props.onClose();
+      } catch (error) {
+        console.error("密码修改请求失败:", error);
+        setError("请求失败，请稍后重试");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     return (
       <div className="modal-mask">
         <Modal
-          title="重置密码"
+          title="修改密码"
           onClose={props.onClose}
           actions={[
             <IconButton
               key="confirm"
-              onClick={handlePasswordReset}
+              onClick={handleSubmit}
               type="primary"
-              text="发送重置邮件"
+              text="确认修改"
+              disabled={isLoading}
             />,
             <IconButton
               key="cancel"
@@ -118,9 +175,36 @@ export function User() {
             />,
           ]}
         >
-          <div className={styles["password-reset-info"]}>
-            <p>我们将向您的邮箱发送密码重置链接。</p>
-            <p>请检查您的邮箱并按照邮件中的说明重置密码。</p>
+          <div className={styles["password-reset-form"]}>
+            {error && <div className={styles["error-message"]}>{error}</div>}
+            <div className={styles["form-group"]}>
+              <label>当前密码</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="请输入当前密码"
+              />
+            </div>
+            <div className={styles["form-group"]}>
+              <label>新密码</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="请输入新密码"
+              />
+            </div>
+            <div className={styles["form-group"]}>
+              <label>确认新密码</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="请再次输入新密码"
+              />
+            </div>
+            {isLoading && <div className={styles["loading"]}>处理中...</div>}
           </div>
         </Modal>
       </div>

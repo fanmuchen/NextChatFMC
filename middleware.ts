@@ -22,8 +22,12 @@ export async function middleware(request: NextRequest) {
   if (isAuthRoute) {
     const response = NextResponse.next();
 
-    // Log auth routes separately
+    // Log auth routes separately with more detailed information
     console.log(`[API] Auth route accessed: ${request.nextUrl.pathname}`);
+
+    // Get basic auth info without full verification to avoid circular dependencies
+    const authHeader = request.headers.get("authorization");
+    const isLogged = !!authHeader && authHeader.startsWith("Bearer ");
 
     logToElastic(request, {
       status: response.status,
@@ -31,7 +35,10 @@ export async function middleware(request: NextRequest) {
       responseTime: Date.now() - startTime,
       level: "info",
       route: "auth",
-      isLogged: false,
+      isLogged: isLogged,
+      method: request.method,
+      path: request.nextUrl.pathname,
+      authRoute: request.nextUrl.pathname,
     }).catch((error) => {
       console.error("Error logging to Elasticsearch:", error);
     });

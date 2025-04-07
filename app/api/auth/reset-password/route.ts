@@ -6,7 +6,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   // Redirect to Logto's password reset page
-  const resetPasswordUrl = `${logtoConfig.endpoint}/reset-password`;
+  const resetPasswordUrl = `${logtoConfig.endpoint.replace(
+    /\/$/,
+    "",
+  )}/reset-password`;
   return new Response(null, {
     status: 302,
     headers: {
