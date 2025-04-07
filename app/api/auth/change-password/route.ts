@@ -1,67 +1,13 @@
 import { NextRequest } from "next/server";
-import { logtoConfig } from "../../../logto";
 import { verifyAuthentication } from "../../../utils/auth-middleware";
 import { logToElastic } from "../../../api/logging-middleware";
+import {
+  verifyUserPassword,
+  updateUserPassword,
+} from "../../../utils/logto-management-api";
 
 // Force this route to be dynamically rendered at runtime
 export const dynamic = "force-dynamic";
-
-// 获取 Management API 访问令牌
-async function getManagementApiToken() {
-  const m2mAppId = process.env.LOGTO_M2M_APP_ID;
-  const m2mAppSecret = process.env.LOGTO_M2M_APP_SECRET;
-
-  if (!m2mAppId || !m2mAppSecret) {
-    console.error("M2M 应用程序凭据未配置", {
-      m2mAppId: m2mAppId ? "已设置" : "未设置",
-      m2mAppSecret: m2mAppSecret ? "已设置" : "未设置",
-      env: process.env.NODE_ENV,
-    });
-    throw new Error("M2M 应用程序凭据未配置");
-  }
-
-  try {
-    console.log("正在获取 Management API 令牌...");
-    const tokenEndpoint = `${logtoConfig.endpoint.replace(
-      /\/$/,
-      "",
-    )}/oidc/token`;
-    console.log(`令牌端点: ${tokenEndpoint}`);
-
-    const response = await fetch(tokenEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: m2mAppId,
-        client_secret: m2mAppSecret,
-        resource: "https://default.logto.app/api",
-        scope: "all",
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("获取 Management API 令牌失败", {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorData,
-      });
-      throw new Error(
-        `获取 Management API 令牌失败: ${JSON.stringify(errorData)}`,
-      );
-    }
-
-    const data = await response.json();
-    console.log("成功获取 Management API 令牌");
-    return data.access_token;
-  } catch (error) {
-    console.error("获取 Management API 令牌时出错:", error);
-    throw error;
-  }
-}
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -120,32 +66,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 获取 Management API 访问令牌
-    console.log("正在获取 Management API 访问令牌");
-    const managementApiToken = await getManagementApiToken();
-    console.log("成功获取 Management API 访问令牌");
-
     // 1. 首先验证当前密码
     console.log("正在验证当前密码");
-    const verifyPasswordEndpoint = `${logtoConfig.endpoint.replace(
-      /\/$/,
-      "",
-    )}/api/users/${authResult.userId}/password/verify`;
-    console.log(`验证密码端点: ${verifyPasswordEndpoint}`);
+    const isPasswordValid = await verifyUserPassword(
+      authResult.userId,
+      currentPassword,
+    );
 
-    const verifyPasswordResponse = await fetch(verifyPasswordEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${managementApiToken}`,
-      },
-      body: JSON.stringify({ password: currentPassword }),
-    });
-
-    if (!verifyPasswordResponse.ok) {
+    if (!isPasswordValid) {
       console.warn("当前密码验证失败", {
-        status: verifyPasswordResponse.status,
-        statusText: verifyPasswordResponse.statusText,
         userId: authResult.userId,
       });
       return new Response(JSON.stringify({ error: "当前密码不正确" }), {
@@ -158,34 +87,7 @@ export async function POST(request: NextRequest) {
 
     // 2. 更新密码
     console.log("正在更新密码");
-    const updatePasswordEndpoint = `${logtoConfig.endpoint.replace(
-      /\/$/,
-      "",
-    )}/api/users/${authResult.userId}/password`;
-    console.log(`更新密码端点: ${updatePasswordEndpoint}`);
-
-    const updatePasswordResponse = await fetch(updatePasswordEndpoint, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${managementApiToken}`,
-      },
-      body: JSON.stringify({ password: newPassword }),
-    });
-
-    if (!updatePasswordResponse.ok) {
-      const errorData = await updatePasswordResponse.json();
-      console.error("密码更新失败", {
-        status: updatePasswordResponse.status,
-        statusText: updatePasswordResponse.statusText,
-        error: errorData,
-        userId: authResult.userId,
-      });
-      return new Response(
-        JSON.stringify({ error: "密码更新失败", details: errorData }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
-    }
+    await updateUserPassword(authResult.userId, newPassword);
 
     console.log("密码更新成功", {
       userId: authResult.userId,
@@ -208,7 +110,6 @@ export async function POST(request: NextRequest) {
       result: "success",
     });
 
-    // 密码更新成功
     return new Response(
       JSON.stringify({ success: true, message: "密码已成功更新" }),
       { status: 200, headers: { "Content-Type": "application/json" } },
