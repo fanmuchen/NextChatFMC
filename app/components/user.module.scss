@@ -407,4 +407,43 @@
       padding: 16px;
     }
   }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .profile-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .profile-label {
+    font-weight: 500;
+    min-width: 60px;
+    color: var(--color-text-secondary);
+  }
+
+  .custom-data {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .custom-data-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    word-break: break-word;
+  }
+
+  .custom-data-label {
+    font-weight: 500;
+    min-width: 80px;
+    color: var(--color-text-secondary);
+  }
 }

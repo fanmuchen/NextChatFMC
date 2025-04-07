@@ -24,6 +24,7 @@ export function User() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userClaims, setUserClaims] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userDetails, setUserDetails] = useState<any>(null);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -49,6 +50,25 @@ export function User() {
 
             if (data.claims.email) {
               setEmail(data.claims.email);
+            }
+
+            // Fetch detailed user information
+            try {
+              const userResponse = await fetch("/api/user/profile");
+              if (userResponse.ok) {
+                const userData = await userResponse.json();
+                setUserDetails(userData);
+
+                // Update username and email with more accurate data if available
+                if (userData.username) {
+                  setUsername(userData.username);
+                }
+                if (userData.email) {
+                  setEmail(userData.email);
+                }
+              }
+            } catch (error) {
+              console.error("Failed to fetch user details:", error);
             }
           }
         }
@@ -94,6 +114,13 @@ export function User() {
   // Handle password reset
   const handlePasswordReset = () => {
     setShowPasswordModal(true);
+  };
+
+  // Format date function
+  const formatDate = (timestamp: number) => {
+    if (!timestamp) return "未知";
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString();
   };
 
   // Password reset modal component
@@ -303,7 +330,146 @@ export function User() {
                     )}
                   </ListItem>
                 )}
+
+                {userDetails?.phone && (
+                  <ListItem title="手机号码">
+                    <div className={styles["user-info"]}>
+                      <span>{userDetails.phone}</span>
+                    </div>
+                  </ListItem>
+                )}
+
+                {userDetails?.userId && (
+                  <ListItem title="用户ID">
+                    <div className={styles["user-info"]}>
+                      <span>{userDetails.userId}</span>
+                    </div>
+                  </ListItem>
+                )}
+
+                {userDetails?.createdAt && (
+                  <ListItem title="注册时间">
+                    <div className={styles["user-info"]}>
+                      <span>{formatDate(userDetails.createdAt)}</span>
+                    </div>
+                  </ListItem>
+                )}
+
+                {userDetails?.lastSignInAt && (
+                  <ListItem title="上次登录">
+                    <div className={styles["user-info"]}>
+                      <span>{formatDate(userDetails.lastSignInAt)}</span>
+                    </div>
+                  </ListItem>
+                )}
+
+                {userDetails?.isSuspended !== undefined && (
+                  <ListItem title="账户状态">
+                    <div className={styles["user-info"]}>
+                      <span>{userDetails.isSuspended ? "已暂停" : "正常"}</span>
+                    </div>
+                  </ListItem>
+                )}
+
+                {userDetails?.hasPassword !== undefined && (
+                  <ListItem title="密码状态">
+                    <div className={styles["user-info"]}>
+                      <span>
+                        {userDetails.hasPassword ? "已设置" : "未设置"}
+                      </span>
+                    </div>
+                  </ListItem>
+                )}
               </List>
+
+              {userDetails?.profile &&
+                Object.keys(userDetails.profile).length > 0 && (
+                  <List>
+                    <ListItem title="个人资料">
+                      <div className={styles["profile-info"]}>
+                        {userDetails.profile.familyName && (
+                          <div className={styles["profile-item"]}>
+                            <span className={styles["profile-label"]}>姓:</span>
+                            <span>{userDetails.profile.familyName}</span>
+                          </div>
+                        )}
+                        {userDetails.profile.givenName && (
+                          <div className={styles["profile-item"]}>
+                            <span className={styles["profile-label"]}>名:</span>
+                            <span>{userDetails.profile.givenName}</span>
+                          </div>
+                        )}
+                        {userDetails.profile.nickname && (
+                          <div className={styles["profile-item"]}>
+                            <span className={styles["profile-label"]}>
+                              昵称:
+                            </span>
+                            <span>{userDetails.profile.nickname}</span>
+                          </div>
+                        )}
+                        {userDetails.profile.website && (
+                          <div className={styles["profile-item"]}>
+                            <span className={styles["profile-label"]}>
+                              网站:
+                            </span>
+                            <span>{userDetails.profile.website}</span>
+                          </div>
+                        )}
+                        {userDetails.profile.gender && (
+                          <div className={styles["profile-item"]}>
+                            <span className={styles["profile-label"]}>
+                              性别:
+                            </span>
+                            <span>{userDetails.profile.gender}</span>
+                          </div>
+                        )}
+                        {userDetails.profile.birthdate && (
+                          <div className={styles["profile-item"]}>
+                            <span className={styles["profile-label"]}>
+                              生日:
+                            </span>
+                            <span>{userDetails.profile.birthdate}</span>
+                          </div>
+                        )}
+                        {userDetails.profile.locale && (
+                          <div className={styles["profile-item"]}>
+                            <span className={styles["profile-label"]}>
+                              语言:
+                            </span>
+                            <span>{userDetails.profile.locale}</span>
+                          </div>
+                        )}
+                      </div>
+                    </ListItem>
+                  </List>
+                )}
+
+              {userDetails?.customData &&
+                Object.keys(userDetails.customData).length > 0 && (
+                  <List>
+                    <ListItem title="自定义数据">
+                      <div className={styles["custom-data"]}>
+                        {Object.entries(userDetails.customData).map(
+                          ([key, value]) => (
+                            <div
+                              key={key}
+                              className={styles["custom-data-item"]}
+                            >
+                              <span className={styles["custom-data-label"]}>
+                                {key}:
+                              </span>
+                              <span>
+                                {typeof value === "object"
+                                  ? JSON.stringify(value)
+                                  : String(value)}
+                              </span>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </ListItem>
+                  </List>
+                )}
 
               <List>
                 <ListItem title="密码" subTitle="定期修改密码可以保障账户安全">
