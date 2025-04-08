@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loading } from "./home";
+import { fetchWithAuthHandling } from "../utils/fetch-wrapper";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch("/api/auth/status");
+        const response = await fetchWithAuthHandling("/api/auth/status");
         if (response.ok) {
           const data = await response.json();
           setIsAuthenticated(data.isAuthenticated);

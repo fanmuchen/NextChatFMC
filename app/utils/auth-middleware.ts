@@ -201,3 +201,16 @@ export async function verifyAuthentication(
     };
   }
 }
+
+/**
+ * Handles 401 Unauthorized errors by redirecting to the login page
+ * This function should be called when a 401 error is received from the server
+ */
+export function handleUnauthorizedError() {
+  console.log("[Auth] Unauthorized error received, redirecting to login page");
+  // Clear any authentication state from localStorage if needed
+  if (typeof window !== "undefined") {
+    // Redirect to the login page
+    window.location.href = "/api/auth/signin";
+  }
+}

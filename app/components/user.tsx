@@ -18,6 +18,8 @@ import {
 } from "./ui-lib";
 import { Loading } from "./home";
 import { encrypt } from "../utils/encryption";
+import { handleUnauthorizedError } from "../utils/auth-middleware";
+import { fetchWithAuthHandling } from "../utils/fetch-wrapper";
 
 export function User() {
   const navigate = useNavigate();
@@ -35,7 +37,7 @@ export function User() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch("/api/auth/status");
+        const response = await fetchWithAuthHandling("/api/auth/status");
         if (response.ok) {
           const data = await response.json();
           setIsAuthenticated(data.isAuthenticated);
@@ -59,7 +61,8 @@ export function User() {
 
             // Fetch detailed user information
             try {
-              const userResponse = await fetch("/api/user/profile");
+              const userResponse =
+                await fetchWithAuthHandling("/api/user/profile");
               if (userResponse.ok) {
                 const userData = await userResponse.json();
                 setUserDetails(userData);
@@ -71,11 +74,29 @@ export function User() {
                 if (userData.email) {
                   setEmail(userData.email);
                 }
+              } else if (userResponse.status === 401) {
+                // Handle unauthorized error
+                console.error("Unauthorized error when fetching user profile");
+                setIsAuthenticated(false);
+                setUserClaims(null);
+                setUserDetails(null);
+                setUsername("");
+                setEmail("");
+                handleUnauthorizedError();
               }
             } catch (error) {
               console.error("Failed to fetch user details:", error);
             }
           }
+        } else if (response.status === 401) {
+          // Handle unauthorized error
+          console.error("Unauthorized error when checking auth status");
+          setIsAuthenticated(false);
+          setUserClaims(null);
+          setUserDetails(null);
+          setUsername("");
+          setEmail("");
+          handleUnauthorizedError();
         }
       } catch (error) {
         console.error("Failed to fetch auth status:", error);
@@ -85,23 +106,6 @@ export function User() {
     };
 
     checkAuthStatus();
-
-    // Add event listener for unauthorized events
-    const handleUnauthorized = () => {
-      console.log("[User] Received unauthorized event, updating auth state");
-      setIsAuthenticated(false);
-      setUserClaims(null);
-      setUserDetails(null);
-      setUsername("");
-      setEmail("");
-    };
-
-    window.addEventListener("auth:unauthorized", handleUnauthorized);
-
-    // Clean up event listener on unmount
-    return () => {
-      window.removeEventListener("auth:unauthorized", handleUnauthorized);
-    };
   }, []);
 
   // Update avatar function
@@ -153,7 +157,9 @@ export function User() {
     useEffect(() => {
       const fetchEncryptionKey = async () => {
         try {
-          const response = await fetch("/api/auth/encryption-key");
+          const response = await fetchWithAuthHandling(
+            "/api/auth/encryption-key",
+          );
           if (!response.ok) {
             throw new Error("Failed to fetch encryption key");
           }
@@ -201,17 +207,20 @@ export function User() {
         );
         const encryptedNewPassword = encrypt(newPassword, encryptionKey);
 
-        const response = await fetch("/api/auth/change-password", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetchWithAuthHandling(
+          "/api/auth/change-password",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              currentPassword: encryptedCurrentPassword,
+              newPassword: encryptedNewPassword,
+              encryptionKey,
+            }),
           },
-          body: JSON.stringify({
-            currentPassword: encryptedCurrentPassword,
-            newPassword: encryptedNewPassword,
-            encryptionKey,
-          }),
-        });
+        );
 
         const data = await response.json();
 

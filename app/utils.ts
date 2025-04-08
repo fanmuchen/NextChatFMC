@@ -12,6 +12,7 @@ import { fetch as tauriStreamFetch } from "./utils/stream";
 import { VISION_MODEL_REGEXES, EXCLUDE_VISION_MODEL_REGEXES } from "./constant";
 import { useAccessStore } from "./store";
 import { ModelSize } from "./typing";
+import { fetchWithAuthHandling } from "./utils/fetch-wrapper";
 
 export function trimTopic(topic: string) {
   // Fix an issue where double quotes still show in the Indonesian language
@@ -357,39 +358,7 @@ export function fetch(
   if (window.__TAURI__) {
     return tauriStreamFetch(url, options);
   }
-
-  // Create a new promise that wraps the original fetch
-  return new Promise((resolve, reject) => {
-    window
-      .fetch(url, options)
-      .then((response) => {
-        // Check if the response is a 401 Unauthorized
-        if (response.status === 401) {
-          console.log(
-            "[Auth] Received 401 Unauthorized response, redirecting to login",
-          );
-
-          // Dispatch a custom event that components can listen for
-          const event = new CustomEvent("auth:unauthorized", {
-            detail: { url, status: response.status },
-          });
-          window.dispatchEvent(event);
-
-          // Redirect to the login page
-          window.location.href = "/api/auth/signin";
-
-          // Reject the promise with the error
-          reject(new Error("Unauthorized: Please log in again"));
-          return;
-        }
-
-        // For non-401 responses, resolve with the original response
-        resolve(response);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+  return fetchWithAuthHandling(url, options as RequestInit);
 }
 
 export function adapter(config: Record<string, unknown>) {

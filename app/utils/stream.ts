@@ -3,6 +3,8 @@
 // 1. invoke('stream_fetch', {url, method, headers, body}), get response with headers.
 // 2. listen event: `stream-response` multi times to get body
 
+import { fetchWithAuthHandling } from "./fetch-wrapper";
+
 type ResponseEvent = {
   id: number;
   payload: {
@@ -93,23 +95,6 @@ export function fetch(url: string, options?: RequestInit): Promise<Response> {
           statusText,
           headers,
         });
-
-        // Handle 401 Unauthorized errors
-        if (status === 401) {
-          console.log(
-            "[Auth] Received 401 Unauthorized response in Tauri fetch, redirecting to login",
-          );
-
-          // Dispatch a custom event that components can listen for
-          const event = new CustomEvent("auth:unauthorized", {
-            detail: { url, status },
-          });
-          window.dispatchEvent(event);
-
-          // Redirect to the login page
-          window.location.href = "/api/auth/signin";
-        }
-
         if (status >= 300) {
           setTimeout(close, 100);
         }
@@ -121,5 +106,5 @@ export function fetch(url: string, options?: RequestInit): Promise<Response> {
         return new Response("", { status: 599 });
       });
   }
-  return window.fetch(url, options);
+  return fetchWithAuthHandling(url, options);
 }

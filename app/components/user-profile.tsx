@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./auth.module.scss";
 import { IconButton } from "./button";
+import { fetchWithAuthHandling } from "../utils/fetch-wrapper";
 
 export function UserProfile() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,7 +13,7 @@ export function UserProfile() {
     // Check authentication status on client side
     const checkAuth = async () => {
       try {
-        const response = await fetch("/api/auth/status");
+        const response = await fetchWithAuthHandling("/api/auth/status");
         if (response.ok) {
           const data = await response.json();
           setIsAuthenticated(data.isAuthenticated);
@@ -28,22 +29,6 @@ export function UserProfile() {
     };
 
     checkAuth();
-
-    // Add event listener for unauthorized events
-    const handleUnauthorized = () => {
-      console.log(
-        "[UserProfile] Received unauthorized event, updating auth state",
-      );
-      setIsAuthenticated(false);
-      setUserName("");
-    };
-
-    window.addEventListener("auth:unauthorized", handleUnauthorized);
-
-    // Clean up event listener on unmount
-    return () => {
-      window.removeEventListener("auth:unauthorized", handleUnauthorized);
-    };
   }, []);
 
   const handleSignOut = () => {
