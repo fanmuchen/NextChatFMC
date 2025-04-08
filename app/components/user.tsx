@@ -85,6 +85,23 @@ export function User() {
     };
 
     checkAuthStatus();
+
+    // Add event listener for unauthorized events
+    const handleUnauthorized = () => {
+      console.log("[User] Received unauthorized event, updating auth state");
+      setIsAuthenticated(false);
+      setUserClaims(null);
+      setUserDetails(null);
+      setUsername("");
+      setEmail("");
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
+    // Clean up event listener on unmount
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
   }, []);
 
   // Update avatar function

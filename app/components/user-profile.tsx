@@ -28,6 +28,22 @@ export function UserProfile() {
     };
 
     checkAuth();
+
+    // Add event listener for unauthorized events
+    const handleUnauthorized = () => {
+      console.log(
+        "[UserProfile] Received unauthorized event, updating auth state",
+      );
+      setIsAuthenticated(false);
+      setUserName("");
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
+    // Clean up event listener on unmount
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
   }, []);
 
   const handleSignOut = () => {

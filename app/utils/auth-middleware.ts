@@ -15,7 +15,7 @@ export type AuthResult = {
 };
 
 // Token will be refreshed if it expires within this time window (in seconds)
-const TOKEN_REFRESH_WINDOW = 300; // 5 minutes
+const TOKEN_REFRESH_WINDOW = 1800; // 30 minutes
 
 /**
  * Log token status with detailed information

@@ -20,8 +20,8 @@ export function trimTopic(topic: string) {
   return (
     topic
       // fix for gemini
-      .replace(/^["“”*]+|["“”*]+$/g, "")
-      .replace(/[，。！？”“"、,.!?*]*$/, "")
+      .replace(/^["""*]+|["""*]+$/g, "")
+      .replace(/[，。！？""""、,.!?*]*$/, "")
   );
 }
 
@@ -357,7 +357,39 @@ export function fetch(
   if (window.__TAURI__) {
     return tauriStreamFetch(url, options);
   }
-  return window.fetch(url, options);
+
+  // Create a new promise that wraps the original fetch
+  return new Promise((resolve, reject) => {
+    window
+      .fetch(url, options)
+      .then((response) => {
+        // Check if the response is a 401 Unauthorized
+        if (response.status === 401) {
+          console.log(
+            "[Auth] Received 401 Unauthorized response, redirecting to login",
+          );
+
+          // Dispatch a custom event that components can listen for
+          const event = new CustomEvent("auth:unauthorized", {
+            detail: { url, status: response.status },
+          });
+          window.dispatchEvent(event);
+
+          // Redirect to the login page
+          window.location.href = "/api/auth/signin";
+
+          // Reject the promise with the error
+          reject(new Error("Unauthorized: Please log in again"));
+          return;
+        }
+
+        // For non-401 responses, resolve with the original response
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
 export function adapter(config: Record<string, unknown>) {

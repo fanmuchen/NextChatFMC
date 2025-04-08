@@ -265,6 +265,20 @@ export function Home({
       }
     };
     initMcp();
+
+    // Add event listener for unauthorized events
+    const handleUnauthorized = () => {
+      console.log("[Home] Received unauthorized event, updating auth state");
+      // Force a re-fetch of the access store to update authentication state
+      useAccessStore.getState().fetch();
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
+    // Clean up event listener on unmount
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
   }, [isAuthenticated, userClaims]);
 
   if (!useHasHydrated()) {

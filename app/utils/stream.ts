@@ -93,6 +93,23 @@ export function fetch(url: string, options?: RequestInit): Promise<Response> {
           statusText,
           headers,
         });
+
+        // Handle 401 Unauthorized errors
+        if (status === 401) {
+          console.log(
+            "[Auth] Received 401 Unauthorized response in Tauri fetch, redirecting to login",
+          );
+
+          // Dispatch a custom event that components can listen for
+          const event = new CustomEvent("auth:unauthorized", {
+            detail: { url, status },
+          });
+          window.dispatchEvent(event);
+
+          // Redirect to the login page
+          window.location.href = "/api/auth/signin";
+        }
+
         if (status >= 300) {
           setTimeout(close, 100);
         }
