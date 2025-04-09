@@ -56,7 +56,12 @@ export async function middleware(request: NextRequest) {
     // 处理token过期的情况
     if (auth.error === "Token expired") {
       console.log(`[API] Token expired for ${request.nextUrl.pathname}`);
-      return NextResponse.json({ error: "Token expired" }, { status: 401 });
+
+      // Return a specific error code for token expiration
+      return NextResponse.json(
+        { error: "Token expired", code: "TOKEN_EXPIRED" },
+        { status: 401 },
+      );
     }
 
     // 处理未认证的情况

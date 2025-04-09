@@ -16,8 +16,9 @@ export async function fetchWithAuthHandling(
     // Handle 401 Unauthorized errors
     if (response.status === 401) {
       console.error(`[Auth] Unauthorized error for request to ${url}`);
+
+      // If we get a 401, redirect to login
       handleUnauthorizedError();
-      // Return the response so the caller can handle it if needed
     }
 
     return response;

@@ -19,7 +19,8 @@ import {
 import { Loading } from "./home";
 import { encrypt } from "../utils/encryption";
 import { handleUnauthorizedError } from "../utils/auth-middleware";
-import { fetchWithAuthHandling } from "../utils/fetch-wrapper";
+import { refreshTokenIfNeeded } from "../utils/token-refresh";
+import { apiRequest } from "../utils/api-client";
 
 export function User() {
   const navigate = useNavigate();
@@ -32,12 +33,16 @@ export function User() {
   const [userClaims, setUserClaims] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userDetails, setUserDetails] = useState<any>(null);
+  const [tokenRefreshInterval, setTokenRefreshInterval] =
+    useState<NodeJS.Timeout | null>(null);
 
   // Check authentication status on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetchWithAuthHandling("/api/auth/status");
+        // Use the enhanced API client that handles token refresh
+        const response = await apiRequest("/api/auth/status");
+
         if (response.ok) {
           const data = await response.json();
           setIsAuthenticated(data.isAuthenticated);
@@ -61,8 +66,7 @@ export function User() {
 
             // Fetch detailed user information
             try {
-              const userResponse =
-                await fetchWithAuthHandling("/api/user/profile");
+              const userResponse = await apiRequest("/api/user/profile");
               if (userResponse.ok) {
                 const userData = await userResponse.json();
                 setUserDetails(userData);
@@ -99,14 +103,37 @@ export function User() {
           handleUnauthorizedError();
         }
       } catch (error) {
-        console.error("Failed to fetch auth status:", error);
+        console.error("Failed to check auth status:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuthStatus();
-  }, []);
+
+    // Set up periodic token refresh (every 15 minutes)
+    const interval = setInterval(
+      async () => {
+        if (isAuthenticated) {
+          try {
+            await refreshTokenIfNeeded();
+          } catch (error) {
+            console.error("Failed to refresh token:", error);
+          }
+        }
+      },
+      15 * 60 * 1000,
+    ); // 15 minutes
+
+    setTokenRefreshInterval(interval);
+
+    // Clean up interval on unmount
+    return () => {
+      if (tokenRefreshInterval) {
+        clearInterval(tokenRefreshInterval);
+      }
+    };
+  }, [isAuthenticated]);
 
   // Update avatar function
   const updateAvatar = (avatar: string) => {
@@ -157,9 +184,7 @@ export function User() {
     useEffect(() => {
       const fetchEncryptionKey = async () => {
         try {
-          const response = await fetchWithAuthHandling(
-            "/api/auth/encryption-key",
-          );
+          const response = await apiRequest("/api/auth/encryption-key");
           if (!response.ok) {
             throw new Error("Failed to fetch encryption key");
           }
@@ -207,20 +232,17 @@ export function User() {
         );
         const encryptedNewPassword = encrypt(newPassword, encryptionKey);
 
-        const response = await fetchWithAuthHandling(
-          "/api/auth/change-password",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              currentPassword: encryptedCurrentPassword,
-              newPassword: encryptedNewPassword,
-              encryptionKey,
-            }),
+        const response = await apiRequest("/api/auth/change-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({
+            currentPassword: encryptedCurrentPassword,
+            newPassword: encryptedNewPassword,
+            encryptionKey,
+          }),
+        });
 
         const data = await response.json();
 
