@@ -117,59 +117,8 @@ export async function verifyAuthentication(
       };
     }
 
-    // Log normal token status before checking for refresh
+    // Log normal token status
     logTokenStatus(request.nextUrl.pathname, claims, exp, now, "Valid Token");
-
-    // If token is about to expire, trigger a refresh by making a new getLogtoContext call
-    // The Logto SDK will handle the refresh automatically
-    if (exp - now < TOKEN_REFRESH_WINDOW) {
-      console.log(
-        `[Auth] Starting token refresh process for request to ${request.nextUrl.pathname}`,
-      );
-
-      try {
-        console.log("[Auth] Calling Logto SDK to refresh token...");
-        const refreshResult = await getLogtoContext(logtoConfig);
-
-        if (!refreshResult.isAuthenticated) {
-          logTokenStatus(
-            request.nextUrl.pathname,
-            refreshResult.claims,
-            refreshResult.claims?.exp,
-            now,
-            "Token Refresh Failed",
-          );
-          return {
-            isAuthenticated: false,
-            userId: "expired",
-            userInfo: {
-              name: "会话已过期",
-              email: undefined,
-              picture: undefined,
-            },
-            error: "Token refresh failed",
-          };
-        }
-
-        // Log successful refresh status
-        logTokenStatus(
-          request.nextUrl.pathname,
-          refreshResult.claims,
-          refreshResult.claims?.exp,
-          now,
-          "Token Refreshed Successfully",
-        );
-      } catch (error) {
-        console.error("[Auth] Error during token refresh:", error);
-        logTokenStatus(
-          request.nextUrl.pathname,
-          claims,
-          exp,
-          now,
-          "Token Refresh Error - Using Existing Token",
-        );
-      }
-    }
 
     // Extract user information from claims
     const userId = claims.sub;

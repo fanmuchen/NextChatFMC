@@ -19,7 +19,6 @@ import {
 import { Loading } from "./home";
 import { encrypt } from "../utils/encryption";
 import { handleUnauthorizedError } from "../utils/auth-middleware";
-import { refreshTokenIfNeeded } from "../utils/token-refresh";
 import { apiRequest } from "../utils/api-client";
 
 export function User() {
@@ -33,8 +32,6 @@ export function User() {
   const [userClaims, setUserClaims] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userDetails, setUserDetails] = useState<any>(null);
-  const [tokenRefreshInterval, setTokenRefreshInterval] =
-    useState<NodeJS.Timeout | null>(null);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -110,29 +107,6 @@ export function User() {
     };
 
     checkAuthStatus();
-
-    // Set up periodic token refresh (every 15 minutes)
-    const interval = setInterval(
-      async () => {
-        if (isAuthenticated) {
-          try {
-            await refreshTokenIfNeeded();
-          } catch (error) {
-            console.error("Failed to refresh token:", error);
-          }
-        }
-      },
-      15 * 60 * 1000,
-    ); // 15 minutes
-
-    setTokenRefreshInterval(interval);
-
-    // Clean up interval on unmount
-    return () => {
-      if (tokenRefreshInterval) {
-        clearInterval(tokenRefreshInterval);
-      }
-    };
   }, [isAuthenticated]);
 
   // Update avatar function
