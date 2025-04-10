@@ -1,4 +1,3 @@
-import { handleUnauthorizedError } from "./auth-middleware";
 import { useAuthStore } from "../store/auth";
 
 /**
@@ -42,15 +41,15 @@ export async function fetchWithAuthHandling(
           authStore.setRefreshing(false);
           return fetchWithAuthHandling(url, options);
         } else {
-          // Token refresh failed, redirect to login
+          // Token refresh failed, update auth state but don't redirect
           authStore.setAuthenticated(false);
           authStore.setRefreshing(false);
-          handleUnauthorizedError();
+          return response; // Return the original 401 response
         }
       } catch (error) {
         console.error("[Auth] Error refreshing token:", error);
         authStore.setRefreshing(false);
-        handleUnauthorizedError();
+        return response; // Return the original 401 response
       }
     }
 
