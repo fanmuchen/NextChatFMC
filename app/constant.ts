@@ -85,10 +85,11 @@ export enum FileName {
 }
 
 export enum StoreKey {
-  Chat = "chat-fmc-ai-store",
+  Chat = "chat-store",
   Plugin = "chat-fmc-ai-plugin",
-  Access = "access-control",
-  Config = "app-config",
+  Access = "access-store",
+  Config = "config-store",
+  Auth = "auth-store",
   Mask = "mask-store",
   Prompt = "prompt-store",
   Update = "chat-update",
