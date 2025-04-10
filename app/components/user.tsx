@@ -20,6 +20,7 @@ import { Loading } from "./home";
 import { encrypt } from "../utils/encryption";
 import { handleUnauthorizedError } from "../utils/auth-middleware";
 import { apiRequest } from "../utils/api-client";
+import { UserMembershipCard } from "./user-membership-card";
 
 export function User() {
   const navigate = useNavigate();
@@ -352,7 +353,7 @@ export function User() {
                   </Popover>
                 </ListItem>
               </List>
-
+              <UserMembershipCard />
               <List>
                 {email && (
                   <ListItem title="邮箱">
@@ -525,6 +526,7 @@ export function User() {
                   type="primary"
                 />
               </ListItem>
+              <UserMembershipCard />
             </List>
           )}
         </div>
